@@ -66,6 +66,8 @@ export class Hud {
     const mid = cx + (cw >> 1);
     font.draw(ctx, clock.dateLabel, mid, 7, PAL.cream, 'center');
     font.draw(ctx, clock.timeLabel, mid, 16, clock.stopped ? PAL.rose : PAL.sun, 'center');
+    kit.panel(ctx, cx, 28, cw, 13);
+    font.draw(ctx, game.moneyLabel, mid, 31, PAL.sun, 'center');
 
     // Toast.
     if (this.toastTime > 0) {

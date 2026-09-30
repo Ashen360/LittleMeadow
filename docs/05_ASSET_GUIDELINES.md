@@ -38,6 +38,10 @@ Phase 1 additions:
   `crop.turnip.0..3`, `crop.potato.0..4`, `crop.strawberry.0..4` (stage 0 = seeds, last = ripe).
 - UI: `ui.slot`, `ui.slot.selected` (20×20, top-left), `ui.cursor` (16×16 tile brackets).
 
+Phase 3 additions (anchor = bottom centre of the object's area, like other objects):
+`tile.plaza0..1`, `obj.store` (6×5 area, 98×86), `obj.cottage.{rose,moss,sky}` (4×4, 66×70),
+`obj.fountain` (3×2), `obj.bench` (2×1), `obj.lamp`, `obj.flowerbed`.
+
 ## Replacing placeholder art
 1. Draw sprites into one PNG sheet (≤ 1024×1024, power of two not required).
 2. Write `assets/atlas.json`: `{ "obj.tree": { "x":0, "y":0, "w":34, "h":46, "ax":17, "ay":43 }, … }`.

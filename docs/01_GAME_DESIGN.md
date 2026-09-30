@@ -51,6 +51,7 @@ Relationship points are tracked in Phase 4 and only change dialogue lightly.
 | Hotbar | 1–9, mouse wheel, click a slot |
 | Bag (inventory) | Tab or I |
 | Sleep | E or right click on the farmhouse door |
+| Shop / ship | E on the store door / on the shipping box (Shift+E buys 5) |
 | Next day (debug builds only, `?debug`) | N |
 | Menu / back / pause | Esc |
 | Debug overlay | F3 or \` |

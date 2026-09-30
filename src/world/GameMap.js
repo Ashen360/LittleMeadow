@@ -11,6 +11,7 @@ export class GameMap {
     this.id = def.id;
     this.name = def.name;
     this.spawn = def.spawn;
+    this.warps = def.warps || [];
     const rows = def.rows;
     this.h = rows.length;
     this.w = rows[0].length;
@@ -69,6 +70,14 @@ export class GameMap {
 
   tileAt(tx, ty) {
     return this.inBounds(tx, ty) ? TILE_TYPES[this.ground[ty * this.w + tx]] : TILE_TYPES[0];
+  }
+
+  // The warp whose strip contains the tile, or null.
+  warpAt(tx, ty) {
+    for (const w of this.warps) {
+      if (tx >= w.x && tx < w.x + w.w && ty >= w.y && ty < w.y + w.h) return w;
+    }
+    return null;
   }
 
   isBlocked(tx, ty) {

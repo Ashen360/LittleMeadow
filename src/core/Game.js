@@ -19,17 +19,19 @@ import { UiKit } from '../ui/UiKit.js';
 import { Hud } from '../ui/Hud.js';
 import { InventoryMenu } from '../ui/InventoryMenu.js';
 import { MenuBox } from '../ui/MenuBox.js';
+import { ShopMenu } from '../ui/ShopMenu.js';
 import { Input } from './Input.js';
 import { GameLoop } from './GameLoop.js';
 import { Debug } from './Debug.js';
 import { Clock } from './Clock.js';
 import { SaveManager, SAVE_VERSION } from './SaveManager.js';
 import { FARM_MAP } from '../data/maps/farm.js';
+import { TOWN_MAP } from '../data/maps/town.js';
 import { ITEMS } from '../data/items.js';
-import { INVENTORY, STARTING_ITEMS, DEBUG_ITEMS, TOOLS } from '../data/tuning.js';
+import { INVENTORY, STARTING_ITEMS, DEBUG_ITEMS, TOOLS, ECONOMY } from '../data/tuning.js';
 
 const SLOT_ACTIONS = Array.from({ length: INVENTORY.hotbar }, (_, i) => `slot${i + 1}`);
-const MAP_DEFS = { farm: FARM_MAP };
+const MAP_DEFS = { farm: FARM_MAP, town: TOWN_MAP };
 const HOME = { map: 'farm', x: 6, y: 7, facing: 0 }; // where you wake up: outside the farmhouse door
 
 export class Game {
@@ -52,6 +54,7 @@ export class Game {
     this.ui = new UiKit(this.atlas, this.font);
     this.hud = new Hud(this.ui);
     this.bag = new InventoryMenu(this.ui);
+    this.shop = new ShopMenu(this.ui);
     this.modals = [];
     this.cursorSprite = this.atlas.get('ui.cursor');
     this.changedTiles = [];
@@ -72,6 +75,16 @@ export class Game {
     return this.clock.day;
   }
 
+  get money() {
+    return this._money;
+  }
+
+  set money(v) {
+    this._money = v;
+    this.moneyLabel = `${v}g`;
+    this.dirty = true;
+  }
+
   // ------------------------------------------------------------------ world state
 
   // A brand-new world: fresh maps, starting items, day 1 at 6:00.
@@ -89,6 +102,8 @@ export class Game {
     for (const s of this.inventory.slots) {
       if (s && ITEMS[s.id].tool === 'can') s.water = TOOLS.can.capacity;
     }
+    this.money = ECONOMY.startMoney;
+    this.shipping = []; // [{ id, qty }] sold overnight
     this.player.energy = this.player.maxEnergy;
     this.player.action = null;
     this.placePlayer(HOME.map, HOME.x, HOME.y, HOME.facing);
@@ -113,6 +128,8 @@ export class Game {
       clock: { day: this.clock.day, minutes: this.clock.minutes },
       player: { map: this.map.id, x: p.x, y: p.y, facing: p.facing, energy: p.energy },
       inventory: { selected: this.inventory.selected, slots: this.inventory.slots },
+      money: this.money,
+      shipping: this.shipping,
       maps,
     };
   }
@@ -131,6 +148,8 @@ export class Game {
       if (s && ITEMS[s.id] && i < inv.slots.length) inv.slots[i] = { ...s };
     });
     inv.selected = Math.min(data.inventory.selected || 0, INVENTORY.hotbar - 1);
+    this.money = data.money ?? ECONOMY.startMoney;
+    this.shipping = (data.shipping || []).filter((e) => ITEMS[e.id]).map((e) => ({ id: e.id, qty: e.qty }));
     const p = data.player;
     const mapId = this.maps[p.map] ? p.map : HOME.map;
     this.placePlayer(mapId, 0, 0, p.facing);
@@ -154,6 +173,7 @@ export class Game {
 
   openModal(m) {
     this.modals.push(m);
+    this.hud.toastTime = 0; // an old message shouldn't linger over a menu
     this.player.stand();
     this.dirty = true;
   }
@@ -256,21 +276,89 @@ export class Game {
 
   // ------------------------------------------------------------------ days
 
-  useDoor(action) {
+  // Actions triggered by the `use` spot of an object (see data/objects.js).
+  useObject(action) {
     if (action === 'sleep') {
       this.ask('Go to bed and end the day?', [
         { label: 'Sleep', action: () => this.sleep() },
         { label: 'Not yet' },
       ]);
+    } else if (action === 'shop') {
+      const m = this.clock.minutes;
+      if (m < ECONOMY.shopOpen || m >= ECONOMY.shopClose) {
+        this.hud.toast('Fenn\'s Provisions is closed. Open 9 am to 5 pm.', 3);
+      } else {
+        this.shop.reset();
+        this.openModal(this.shop);
+      }
+    } else if (action === 'ship') {
+      this.shipSelected();
     }
   }
 
-  sleep() {
-    this.fade.start(() => this.endDay(), () => this.hud.toast(`Good morning! ${this.clock.dateLabel}.`, 3));
+  // Puts the selected stack in the shipping box. With empty hands, takes the last stack back.
+  shipSelected() {
+    const inv = this.inventory;
+    const slot = inv.selectedSlot;
+    if (!slot) {
+      const last = this.shipping.pop();
+      if (!last) {
+        this.hud.toast('Hold something to sell, then use the box. It\'s sold overnight.', 3);
+        return;
+      }
+      const left = inv.add(last.id, last.qty);
+      if (left > 0) this.shipping.push({ id: last.id, qty: left });
+      this.hud.toast(`Took back ${last.qty - left} ${ITEMS[last.id].name}.`);
+      return;
+    }
+    const item = ITEMS[slot.id];
+    if (!item.sellPrice) {
+      this.hud.toast(`The ${item.name} can't be sold.`);
+      return;
+    }
+    const entry = this.shipping.find((e) => e.id === slot.id);
+    if (entry) entry.qty += slot.qty;
+    else this.shipping.push({ id: slot.id, qty: slot.qty });
+    this.hud.toast(`Shipped ${slot.qty} ${item.name} (${slot.qty * item.sellPrice}g, paid overnight).`, 3);
+    this.effects.float(`${slot.qty * item.sellPrice}g`, this.player.x, this.player.y - 28, PAL.sun);
+    inv.slots[inv.selected] = null;
+    if (this.audio) this.audio.play('ship');
   }
 
-  // Overnight: crops grow, soil dries, energy refills, a new day starts at 6:00, then autosave.
+  // Steps onto a warp tile: fade and move to the other map.
+  warp(w) {
+    const ox = this.player.tileX - w.x, oy = this.player.tileY - w.y;
+    this.fade.start(() => this.placePlayer(w.to, w.tx + ox, w.ty + oy, w.facing));
+  }
+
+  sleep() {
+    let sales = null;
+    this.fade.start(() => { sales = this.endDay(); }, () => {
+      if (sales) this.ask(sales, [{ label: 'Lovely' }]);
+      this.hud.toast(`Good morning! ${this.clock.dateLabel}.`, 3);
+    });
+  }
+
+  // Pays for shipped items. Returns a summary text, or null if nothing was shipped.
+  sellShipping() {
+    if (!this.shipping.length) return null;
+    let total = 0;
+    const lines = ['Shipped yesterday:'];
+    for (const e of this.shipping) {
+      const value = e.qty * ITEMS[e.id].sellPrice;
+      total += value;
+      lines.push(`${e.qty} ${ITEMS[e.id].name}: ${value}g`);
+    }
+    lines.push(`Total: ${total}g`);
+    this.money += total;
+    this.shipping = [];
+    return lines.join('\n');
+  }
+
+  // Overnight: shipped items sell, crops grow, soil dries, energy refills, a new day starts at
+  // 6:00, then autosave. Returns the sales summary (or null).
   endDay() {
+    const sales = this.sellShipping();
     for (const map of Object.values(this.maps)) {
       this.farming.newDay(map, this.changedTiles);
       for (const i of this.changedTiles) this.renderer.redrawTile(map, i % map.w, Math.floor(i / map.w));
@@ -280,6 +368,7 @@ export class Game {
     this.player.action = null;
     this.placePlayer(HOME.map, HOME.x, HOME.y, HOME.facing);
     this.save();
+    return sales;
   }
 
   // ------------------------------------------------------------------ frame
@@ -338,7 +427,14 @@ export class Game {
     for (let remaining = dt; remaining > 0; remaining -= MAX_STEP) {
       if (this.player.update(Math.min(remaining, MAX_STEP), input, this.map)) changed = true;
     }
-    if (changed) this.dirty = true;
+    if (changed) {
+      this.dirty = true;
+      const w = this.map.warpAt(this.player.tileX, this.player.tileY);
+      if (w) {
+        this.warp(w);
+        return;
+      }
+    }
     this.tools.update(dt, input);
 
     const step = this.clock.update(dt);

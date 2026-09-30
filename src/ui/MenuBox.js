@@ -98,7 +98,7 @@ export class MenuBox {
     for (let i = 0; i < this.items.length; i++) {
       const it = this.items[i];
       const y = this.itemsY + i * ITEM_H;
-      const color = it.disabled ? PAL.plum : i === this.cursor ? PAL.sun : PAL.cream;
+      const color = it.disabled ? PAL.soilLight : i === this.cursor ? PAL.sun : PAL.cream;
       if (i === this.cursor && !it.disabled) {
         ctx.fillStyle = PAL.barkDark;
         ctx.fillRect(this.x + 4, y - 2, this.w - 8, ITEM_H - 1);

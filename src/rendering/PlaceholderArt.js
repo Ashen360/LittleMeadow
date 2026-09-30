@@ -467,6 +467,207 @@ function stump() {
   return p.canvas;
 }
 
+// ---------------------------------------------------------------- Bramblewick
+
+// Warm cobblestones: staggered rows of stones with dark mortar.
+function plazaTile(seed) {
+  const p = new Pen(16, 16);
+  const r = rng(seed);
+  p.rect(PAL.pathDark, 0, 0, 16, 16);
+  for (let row = 0; row < 4; row++) {
+    const y = row * 4;
+    let x = row % 2 ? -3 : 0;
+    while (x < 16) {
+      const w = 4 + ((r() * 3) | 0);
+      const c = r() < 0.3 ? PAL.pathLight : PAL.path;
+      const x0 = Math.max(0, x), x1 = Math.min(16, x + w - 1);
+      if (x1 > x0) p.rect(c, x0, y, x1 - x0, 3);
+      if (x >= 0) p.rect(PAL.cream, x, y);
+      x += w;
+    }
+  }
+  return p.canvas;
+}
+
+// A small cottage for a 4x4 area (door on tile column 1, window on the right).
+function cottage(roof, roofDark, roofLight, wall, wallDark) {
+  const p = new Pen(66, 70);
+  const R = (c, x, y, w = 1, h = 1) => p.rect(c, x + 1, y + 1, w, h);
+  R(PAL.stone, 44, 2, 6, 12);
+  R(PAL.stoneDark, 48, 2, 2, 12);
+  R(PAL.stoneDark, 43, 0, 8, 2);
+  for (let y = 6; y <= 33; y++) {
+    const t = (y - 6) / 27;
+    const xl = Math.round(12 - 12 * t), xr = Math.round(51 + 12 * t);
+    const band = Math.floor((y - 6) / 4);
+    for (let x = xl; x <= xr; x++) {
+      let c = roof;
+      if (y <= 7) c = roofLight;
+      else if ((y - 6) % 4 === 3) c = roofDark;
+      else if ((x + band * 2) % 6 === 0) c = roofDark;
+      R(c, x, y);
+    }
+  }
+  R(roofDark, 0, 32, 64, 2);
+  R(wall, 3, 34, 58, 28);
+  for (let y = 38; y < 62; y += 4) R(wallDark, 3, y, 58, 1);
+  R(wallDark, 3, 34, 58, 2);
+  R(wallDark, 58, 34, 3, 28);
+  // Door (tile column 1) and window.
+  R(PAL.bark, 18, 42, 12, 20);
+  R(PAL.wood, 20, 44, 8, 18);
+  R(PAL.bark, 23, 44, 1, 18);
+  R(PAL.sun, 26, 53, 1, 2);
+  R(PAL.cream, 38, 40, 14, 11);
+  R(PAL.waterLight, 39, 41, 12, 9);
+  R(PAL.water, 39, 46, 12, 4);
+  R(PAL.cream, 44, 41, 2, 9);
+  R(PAL.white, 40, 42, 2, 2);
+  R(PAL.wood, 37, 51, 16, 3);
+  for (let i = 0; i < 5; i++) R(i % 2 ? PAL.sun : PAL.rose, 38 + i * 3, 50);
+  R(PAL.stone, 2, 62, 60, 4);
+  R(PAL.stoneDark, 2, 65, 60, 1);
+  for (let x = 6; x < 62; x += 8) R(PAL.stoneDark, x, 62, 1, 3);
+  R(PAL.stoneLight, 16, 62, 16, 3);
+  p.outline();
+  return p.canvas;
+}
+
+// Fenn's Provisions: a 6x5 shop with a striped awning, a painted sign and shop windows.
+function store() {
+  const p = new Pen(98, 86);
+  const R = (c, x, y, w = 1, h = 1) => p.rect(c, x + 1, y + 1, w, h);
+  for (let y = 4; y <= 36; y++) {
+    const t = (y - 4) / 32;
+    const xl = Math.round(14 - 14 * t), xr = Math.round(81 + 14 * t);
+    const band = Math.floor((y - 4) / 4);
+    for (let x = xl; x <= xr; x++) {
+      let c = PAL.leafDark;
+      if (y <= 5) c = PAL.leafLight;
+      else if ((y - 4) % 4 === 3) c = PAL.leafDeep;
+      else if ((x + band * 3) % 7 === 0) c = PAL.leafDeep;
+      else if ((y - 4) % 4 === 0) c = PAL.leaf;
+      R(c, x, y);
+    }
+  }
+  R(PAL.leafDeep, 0, 36, 96, 2);
+  // Walls.
+  R(PAL.cream, 3, 38, 90, 40);
+  for (let y = 42; y < 78; y += 5) R(PAL.pathLight, 3, y, 90, 1);
+  R(PAL.pathDark, 90, 38, 3, 40);
+  // Sign board on the roof.
+  R(PAL.barkDark, 28, 20, 40, 13);
+  R(PAL.woodLight, 29, 21, 38, 11);
+  R(PAL.wood, 29, 26, 38, 1);
+  p.ellipse(PAL.rose, 1 + 40, 1 + 26.5, 3.5, 3);
+  R(PAL.leaf, 39, 21, 3, 2);
+  for (let i = 0; i < 4; i++) R(PAL.barkDark, 46 + i * 5, 24, 3, 5);
+  // Awning: rose and cream stripes with a scalloped edge.
+  for (let x = 3; x < 93; x++) {
+    const stripe = Math.floor((x - 3) / 6) % 2 === 0 ? PAL.rose : PAL.cream;
+    const len = 7 + (((x - 3) % 6 === 2 || (x - 3) % 6 === 3) ? 1 : 0);
+    R(stripe, x, 38, 1, len);
+    R(PAL.berry, x, 38 + len, 1, 1);
+  }
+  R(PAL.berry, 3, 38, 90, 1);
+  // Windows with shelves of goods.
+  for (const [wx, ww] of [[8, 30], [60, 28]]) {
+    R(PAL.bark, wx - 1, 50, ww + 2, 20);
+    R(PAL.waterLight, wx, 51, ww, 18);
+    R(PAL.water, wx, 60, ww, 9);
+    for (const sy of [56, 64]) {
+      R(PAL.wood, wx, sy, ww, 1);
+      for (let i = 0; i < ww - 2; i += 4) {
+        const c = [PAL.rose, PAL.sun, PAL.leafLight, PAL.peach][(i / 4 + sy) % 4];
+        R(c, wx + 1 + i, sy - 3, 3, 3);
+      }
+    }
+    R(PAL.white, wx + 2, 52, 3, 2);
+  }
+  // Door (tile column 3).
+  R(PAL.barkDark, 49, 48, 14, 30);
+  R(PAL.wood, 51, 50, 10, 28);
+  R(PAL.waterLight, 53, 53, 6, 8);
+  R(PAL.sun, 59, 65, 1, 2);
+  // Foundation and step.
+  R(PAL.stone, 2, 78, 92, 4);
+  R(PAL.stoneDark, 2, 81, 92, 1);
+  R(PAL.stoneLight, 47, 78, 18, 3);
+  p.outline();
+  return p.canvas;
+}
+
+function fountain() {
+  const p = new Pen(50, 44);
+  const cx = 25;
+  p.ellipse(PAL.shadow, cx, 38, 23, 5);
+  // Basin rim, water, then the column and upper bowl.
+  p.shade((x, y) => {
+    const dx = (x + 0.5 - cx) / 23, dy = (y + 0.5 - 30) / 10;
+    const d = dx * dx + dy * dy;
+    if (d > 1) return null;
+    const ix = (x + 0.5 - cx) / 19, iy = (y + 0.5 - 29) / 7;
+    if (ix * ix + iy * iy <= 1) return y < 27 ? PAL.water : (x + y) % 7 === 0 ? PAL.waterLight : PAL.water;
+    return y > 32 ? PAL.stoneDark : dx < -0.3 ? PAL.stoneLight : PAL.stone;
+  });
+  p.rect(PAL.stone, cx - 3, 12, 6, 16);
+  p.rect(PAL.stoneDark, cx + 1, 12, 2, 16);
+  p.ellipse(PAL.stone, cx, 12, 9, 3.5);
+  p.ellipse(PAL.water, cx, 11.5, 7, 2.2);
+  p.rect(PAL.stoneLight, cx - 1, 3, 2, 7);
+  p.rect(PAL.waterLight, cx - 1, 1, 2, 2);
+  for (const s of [-1, 1]) {
+    p.line(PAL.waterLight, cx + s * 6, 14, cx + s * 12, 24);
+  }
+  p.outline();
+  return p.canvas;
+}
+
+function bench() {
+  const p = new Pen(34, 22);
+  p.ellipse(PAL.shadow, 17, 19, 15, 2);
+  p.rect(PAL.bark, 3, 3, 28, 2);
+  p.rect(PAL.woodLight, 3, 6, 28, 3);
+  p.rect(PAL.wood, 3, 9, 28, 1);
+  p.rect(PAL.woodLight, 2, 11, 30, 3);
+  p.rect(PAL.wood, 2, 14, 30, 1);
+  for (const x of [4, 28]) {
+    p.rect(PAL.barkDark, x, 3, 2, 17);
+  }
+  p.outline();
+  return p.canvas;
+}
+
+function lamp() {
+  const p = new Pen(14, 38);
+  p.rect(PAL.stoneDark, 5, 12, 3, 23);
+  p.rect(PAL.stone, 5, 12, 1, 23);
+  p.rect(PAL.stoneDark, 3, 33, 7, 3);
+  p.rect(PAL.stoneDark, 3, 4, 7, 2);
+  p.rect(PAL.sun, 4, 6, 5, 5);
+  p.rect(PAL.cream, 5, 7, 2, 2);
+  p.rect(PAL.stoneDark, 3, 11, 7, 1);
+  p.rect(PAL.stoneDark, 5, 2, 3, 2);
+  p.outline();
+  return p.canvas;
+}
+
+function flowerbed(seed) {
+  const p = new Pen(18, 16);
+  const r = rng(seed);
+  p.rect(PAL.wood, 1, 8, 16, 6);
+  p.rect(PAL.bark, 1, 12, 16, 2);
+  p.rect(PAL.soil, 2, 8, 14, 3);
+  const petals = [PAL.rose, PAL.sun, PAL.cream, PAL.berry, PAL.peach];
+  for (let i = 0; i < 6; i++) {
+    const x = 3 + i * 2 + ((r() * 2) | 0), y = 3 + ((r() * 4) | 0);
+    p.rect(PAL.leaf, x, y + 1, 1, 8 - y);
+    p.rect(petals[(r() * petals.length) | 0], x, y);
+  }
+  p.outline();
+  return p.canvas;
+}
+
 // ---------------------------------------------------------------- item icons (16x16)
 
 function iconPen(draw) {
@@ -829,6 +1030,16 @@ export function buildPlaceholderArt(atlas) {
   atlas.add('obj.shippingbox', shippingBox(), 10, 17);
   atlas.add('obj.sign', sign(), 8, 19);
   atlas.add('obj.stump', stump(), 9, 14);
+
+  for (let i = 0; i < 2; i++) atlas.add(`tile.plaza${i}`, plazaTile(601 + i * 9));
+  atlas.add('obj.store', store(), 49, 84);
+  atlas.add('obj.cottage.rose', cottage(PAL.roof, PAL.roofDark, PAL.roofLight, PAL.woodLight, PAL.wood), 33, 68);
+  atlas.add('obj.cottage.moss', cottage(PAL.leafDark, PAL.leafDeep, PAL.leaf, PAL.cream, PAL.pathLight), 33, 68);
+  atlas.add('obj.cottage.sky', cottage(PAL.water, PAL.waterDeep, PAL.waterLight, PAL.pathLight, PAL.path), 33, 68);
+  atlas.add('obj.fountain', fountain(), 25, 41);
+  atlas.add('obj.bench', bench(), 17, 20);
+  atlas.add('obj.lamp', lamp(), 7, 37);
+  atlas.add('obj.flowerbed', flowerbed(5), 9, 15);
   atlas.add('shadow.small', smallShadow(), 6, 2);
 
   // Item icons are anchored at their centre. Tools also get held sprites (right / left).

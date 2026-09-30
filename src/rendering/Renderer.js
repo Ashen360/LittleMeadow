@@ -38,6 +38,7 @@ export class Renderer {
       grass: range('tile.grass', 4),
       flowers: range('decor.flowers', 3),
       path: range('tile.path', 2),
+      plaza: range('tile.plaza', 2),
       field: range('tile.field', 2),
       water: range('tile.water', 2),
       soil: a.get('tile.soil'),
@@ -104,6 +105,10 @@ export class Renderer {
         break;
       case 'path':
         a.draw(g, t.path[h % 2], x, y);
+        this.drawEdges(map, tx, ty, x, y, (n) => n.grassy, t.grassEdge);
+        break;
+      case 'plaza':
+        a.draw(g, t.plaza[h % 2], x, y);
         this.drawEdges(map, tx, ty, x, y, (n) => n.grassy, t.grassEdge);
         break;
       case 'field': {

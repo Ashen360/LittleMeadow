@@ -67,9 +67,25 @@ Sleeping (farmhouse door): fade out → ship sales (Phase 3) → grow crops and 
 map → restore energy → 6:00 next day → reset NPCs (Phase 4) → wake outside the door → save.
 Saving after the rollover means reloading lands on the fresh morning.
 
-## Economy 🔜 (Phase 3)
-Shop buys seeds at the listed price. Shipping box: items placed in it are sold overnight
-for `sellPrice × qty`, with a summary on waking. Starting money 200g plus 12 turnip seeds.
+## Maps & warps ✅
+Each map may list `warps: [{ x, y, w, h, to, tx, ty, facing }]`. Stepping onto a tile of the
+strip fades to the other map at `(tx, ty)` plus the same offset within the strip, so walking
+along the edge of a road lines up on the other side. All maps stay loaded, so crops on the
+farm keep growing while you're in town.
+
+## Economy ✅
+Starting money 200g plus 12 turnip seeds. Prices live on items: `price` (shop) and
+`sellPrice` (shipping). Seeds sell back for half. Wood 2g, stone 3g.
+| Item | Buy | Sell |
+|---|---|---|
+| Turnip seeds / turnip | 20g | 45g |
+| Potato seeds / potato | 40g | 90g |
+| Strawberry seeds / strawberry | 80g | 60g |
+**Shop:** Fenn's Provisions door, open 9:00–17:00 (stock in `ECONOMY.shopStock`). E/click buys
+one, Shift buys five; it refuses when you can't afford it or the bag is full.
+**Shipping box:** E (or right click) with a stack selected ships the whole stack; with empty
+hands it gives back the most recent stack. Everything in the box is sold overnight for
+`sellPrice × qty`, and a summary greets you in the morning.
 
 ## NPCs & dialogue 🔜 (Phase 4)
 Schedule = list of `{ time, map, x, y, facing }`. At each time boundary the NPC paths to the

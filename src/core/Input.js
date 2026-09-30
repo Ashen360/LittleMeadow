@@ -11,6 +11,7 @@ export const DEFAULT_BINDINGS = {
   interact: ['KeyE'],
   use: ['Space'],
   confirm: ['Enter', 'NumpadEnter'],
+  bulk: ['ShiftLeft', 'ShiftRight'],
   menu: ['Escape'],
   inventory: ['Tab', 'KeyI'],
   nextDay: ['KeyN'], // temporary until sleeping exists (Phase 2)

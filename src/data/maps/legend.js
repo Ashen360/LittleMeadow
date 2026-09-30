@@ -6,6 +6,7 @@ export const LEGEND = {
   '=': { ground: 'path' },
   '~': { ground: 'water' },
   ':': { ground: 'field' },
+  '#': { ground: 'plaza' },
   T: { ground: 'grass', object: 'tree' },
   P: { ground: 'grass', object: 'pine' },
   B: { ground: 'grass', object: 'bush' },

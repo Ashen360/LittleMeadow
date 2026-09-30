@@ -1,6 +1,6 @@
 // Little Meadow Farm: 40 x 30 tiles. Legend: see ./legend.js.
 // The field (':') is the tillable area; 'r' / 'b' are rocks and branches to clear.
-// The path on row 14 leads east to Bramblewick (warp added in Phase 3).
+// The path on row 14 leads east to Bramblewick.
 
 export const FARM_MAP = {
   id: 'farm',
@@ -42,6 +42,9 @@ export const FARM_MAP = {
     { type: 'shippingBox', x: 10, y: 6 },
     { type: 'mailbox', x: 7, y: 8 },
     { type: 'sign', x: 36, y: 13 },
+  ],
+  warps: [
+    { x: 39, y: 13, w: 1, h: 3, to: 'town', tx: 1, ty: 13, facing: 2 },
   ],
   spawn: { x: 6, y: 7 },
 };

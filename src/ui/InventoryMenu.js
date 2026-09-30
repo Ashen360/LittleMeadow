@@ -115,6 +115,6 @@ export class InventoryMenu {
         font.draw(ctx, this.infoLines[i], PANEL_X + PAD, INFO_Y + 10 + i * 9, PAL.cream);
       }
     }
-    font.draw(ctx, 'Click or E: pick up / swap', PANEL_X + PAD, PANEL_Y + PANEL_H - 11, PAL.peach);
+    font.draw(ctx, 'Click or E: pick up / swap', PANEL_X + PAD, PANEL_Y + PANEL_H - 11, PAL.dirtLight);
   }
 }

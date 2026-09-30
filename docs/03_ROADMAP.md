@@ -44,10 +44,17 @@ single-file build (turnip: 4 watered nights → harvest; strawberry regrows 3 da
 **Deliverable:** several in-game days, safely resumed after a refresh. Verified: new game →
 till → sleep → reload → Continue restores the date, soil and inventory.
 
-## Phase 3: Town + Economy
-Town map · map warps with a fade transition · shop UI (buy seeds) · shipping box
-(overnight sale + summary) · money HUD.
-**Deliverable:** Farm → Grow → Harvest → Sell → Buy → Farm.
+## Phase 3: Town + Economy ✅
+- [x] Bramblewick (`data/maps/town.js`): Fenn's Provisions, a cobbled square with a fountain,
+      benches and lamps, three cottages, flower beds, a sign back to the farm
+- [x] Map warps (`warps` in map data) with a fade; the farm's east road ↔ the town's west road
+- [x] Shop (store door, 9:00–17:00): buy seeds one at a time or five with Shift
+- [x] Shipping box: E ships the selected stack, E with empty hands takes the last stack back;
+      sold overnight with a morning summary
+- [x] Money HUD under the clock; 200g to start; money and the shipping box are saved
+
+**Deliverable:** Farm → Grow → Harvest → Sell → Buy → Farm. Verified: walk to town, buy seeds,
+ship turnips and wood, sleep, get paid, reload with the money kept.
 
 ## Phase 4: NPCs
 4 villagers (`data/npcs.js`) · schedule rules (time → map/tile) with simple grid walking

@@ -23,6 +23,14 @@ export const TIME = {
   nightStart: 21 * 60,    // fully dimmed
 };
 
+export const ECONOMY = {
+  startMoney: 200,
+  shopOpen: 9 * 60,
+  shopClose: 17 * 60,
+  // What Fenn's Provisions sells, in display order.
+  shopStock: ['turnipSeeds', 'potatoSeeds', 'strawberrySeeds'],
+};
+
 export const FARMING = {
   // Tilled soil with no crop reverts to plain field after this many nights.
   fallowNights: 3,

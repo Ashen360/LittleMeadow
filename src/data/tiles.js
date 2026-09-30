@@ -8,6 +8,7 @@ export const TILE_TYPES = [
   { key: 'path', solid: false },
   { key: 'water', solid: true, water: true },
   { key: 'field', solid: false, tillable: true },
+  { key: 'plaza', solid: false },
 ];
 
 export const TILE_ID = Object.fromEntries(TILE_TYPES.map((t, i) => [t.key, i]));
