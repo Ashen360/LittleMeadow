@@ -3,6 +3,7 @@
 // whole area.
 // breakable = { tool, hits, drops: [[itemId, qty]], becomes? } — cleared with that tool.
 // examine = text shown when interacting (E); hint = text shown when a tool can't affect it.
+// door = { dx, dy, action }: interacting with that tile of the object triggers the action.
 
 export const OBJECT_TYPES = {
   tree: {
@@ -24,7 +25,10 @@ export const OBJECT_TYPES = {
   },
   bush: { sprite: 'obj.bush', w: 1, h: 1, solid: true, hint: 'The berries on this bush aren\'t ripe yet.' },
   // The top row is roof overhang you can walk behind.
-  house: { sprite: 'obj.house', w: 5, h: 4, solid: true, footprint: [0, 1, 5, 3], examine: 'Home, sweet home.' },
+  house: {
+    sprite: 'obj.house', w: 5, h: 4, solid: true, footprint: [0, 1, 5, 3],
+    examine: 'Home, sweet home.', door: { dx: 2, dy: 3, action: 'sleep' },
+  },
   mailbox: { sprite: 'obj.mailbox', w: 1, h: 1, solid: true, examine: 'The mailbox is empty.' },
   shippingBox: {
     sprite: 'obj.shippingbox', w: 1, h: 1, solid: true,

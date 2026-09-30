@@ -100,12 +100,18 @@ All drawing goes through `Atlas` by **sprite name** (`player.down.1`, `obj.tree`
 To use real art, load a PNG sheet plus a JSON of named rects into the same atlas. No
 gameplay code changes. See 05_ASSET_GUIDELINES.md.
 
-## Save format (Phase 2)
-`localStorage["littlemeadow.save.v1"]` = `{ version, savedAt, player, clock, inventory,
-money, maps: { farm: { soil: [...], crops: [...], removedObjects: [...] } }, npcs }`.
-`SaveManager` runs chained migrations `v1→v2→…` on load. Autosave happens on sleep and
-when the page is hidden (`visibilitychange`), so a refresh never loses more than the
-current in-game day's movement.
+## Save format
+`localStorage["littlemeadow.save"]` = `{ version: 1, savedAt, clock: { day, minutes },
+player: { map, x, y, facing, energy }, inventory: { selected, slots }, maps: { <id>: {
+objects: [[type, x, y, hits?]], soil, watered, fallow (one digit per tile), crops: [[id, x,
+y, growth]] } } }` (+ `money`, `shipping`, `npcs` from Phases 3–4).
+Saving writes `littlemeadow.save.tmp`, copies the old save to `littlemeadow.save.bak`, then
+writes the main key. Loading tries the main key, then the backup. `SaveManager` runs chained
+migrations (`MIGRATIONS[n]` upgrades version n to n+1) on load; bump `SAVE_VERSION` and add
+a migration whenever the shape changes. Autosave happens on sleep, when the tab is hidden
+and on `pagehide`, so a refresh loses nothing.
+Maps store their full object list (not a diff), so removed debris and new stumps survive,
+and unknown object/crop/item ids are skipped on load instead of crashing.
 
 ## Bundling constraints (keep `tools/build.mjs` simple)
 - Named exports only (`export class/function/const`). No `export default`, no `export { }` lists.

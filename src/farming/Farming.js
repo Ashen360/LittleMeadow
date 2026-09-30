@@ -44,6 +44,7 @@ export class Farming {
 
   plant(map, tx, ty, cropId) {
     const def = CROPS[cropId];
+    if (!def) return null;
     const crop = {
       id: cropId, def, x: tx, y: ty, growth: 0, stage: 0,
       px: tx * TILE + TILE / 2,

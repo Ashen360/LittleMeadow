@@ -59,9 +59,13 @@ its item up, then on another slot to swap them. WASD moves the cursor.
 Starting items: hoe, watering can, axe, pickaxe, 12 turnip seeds. With `?debug`, also 6 potato
 and 4 strawberry seeds, so every crop can be tested before the shop exists.
 
-## Time 🔜 (Phase 2)
-10 in-game minutes per 10 real seconds. The day starts at 6:00 and the clock stops at 2:00.
-Sleeping: save → grow crops → clear watered → restore energy → reset NPCs → 6:00 next day.
+## Time ✅
+10 in-game minutes per 10 real seconds. The day starts at 6:00 and the clock stops at 2:00
+("It's very late…"); you never pass out. The clock pauses while any menu or prompt is open.
+From 18:00 to 21:00 a plum wash fades in (evening light).
+Sleeping (farmhouse door): fade out → ship sales (Phase 3) → grow crops and dry soil on every
+map → restore energy → 6:00 next day → reset NPCs (Phase 4) → wake outside the door → save.
+Saving after the rollover means reloading lands on the fresh morning.
 
 ## Economy 🔜 (Phase 3)
 Shop buys seeds at the listed price. Shipping box: items placed in it are sold overnight

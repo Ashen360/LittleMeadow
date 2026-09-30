@@ -123,6 +123,43 @@ export class GameMap {
     });
   }
 
+  // ---------------------------------------------------------------- save state
+
+  // Objects, soil and crops (crops are rebuilt through Farming so sprites resolve).
+  saveState() {
+    return {
+      objects: this.objects.map((o) => (o.hits ? [o.type, o.x, o.y, o.hits] : [o.type, o.x, o.y])),
+      soil: Array.from(this.soil).join(''),
+      watered: Array.from(this.watered).join(''),
+      fallow: Array.from(this.fallow).join(''),
+      crops: this.crops.map((c) => [c.id, c.x, c.y, c.growth]),
+    };
+  }
+
+  loadState(state, farming) {
+    for (const o of this.objects.slice()) this.removeObject(o);
+    for (const [type, x, y, hits] of state.objects) {
+      if (!OBJECT_TYPES[type]) continue; // an object type that no longer exists
+      const o = this.addObject(type, x, y);
+      if (hits) o.hits = hits;
+    }
+    const n = this.w * this.h;
+    for (let i = 0; i < n; i++) {
+      this.soil[i] = Number(state.soil[i]) || 0;
+      this.watered[i] = Number(state.watered[i]) || 0;
+      this.fallow[i] = Number(state.fallow[i]) || 0;
+    }
+    this.cropAt.fill(null);
+    this.crops.length = 0;
+    for (const [id, x, y, growth] of state.crops) {
+      if (!this.inBounds(x, y)) continue;
+      const crop = farming.plant(this, x, y, id);
+      if (!crop) continue;
+      crop.growth = growth;
+      farming.setStage(crop);
+    }
+  }
+
   forFootprint(obj, fn) {
     for (let ty = obj.fy; ty < obj.fy + obj.fh; ty++) {
       for (let tx = obj.fx; tx < obj.fx + obj.fw; tx++) {

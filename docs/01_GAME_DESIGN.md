@@ -50,8 +50,9 @@ Relationship points are tracked in Phase 4 and only change dialogue lightly.
 | Secondary (e.g. eat) | Right click |
 | Hotbar | 1–9, mouse wheel, click a slot |
 | Bag (inventory) | Tab or I |
-| Next day (temporary, until sleeping in Phase 2) | N |
-| Menu / back | Esc |
+| Sleep | E or right click on the farmhouse door |
+| Next day (debug builds only, `?debug`) | N |
+| Menu / back / pause | Esc |
 | Debug overlay | F3 or \` |
 
 ## Time

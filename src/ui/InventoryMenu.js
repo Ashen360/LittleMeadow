@@ -1,5 +1,6 @@
 // The bag: all inventory slots (the top row is the hotbar). Click or press E/Space on a slot to
 // pick its item up, then on another slot to swap them. Movement keys move the cursor.
+// A modal: Tab / I / Esc close it.
 
 import { VIEW_W, VIEW_H } from '../config.js';
 import { PAL } from '../rendering/palette.js';
@@ -22,15 +23,14 @@ const INFO_Y = GRID_Y + ROWS * SLOT + HOTBAR_GAP + 3;
 export class InventoryMenu {
   constructor(kit) {
     this.kit = kit;
-    this.open = false;
     this.cursor = 0;
     this.held = -1;      // slot index picked up, or -1
     this.infoId = null;  // item whose description is wrapped in infoLines
     this.infoLines = [];
   }
 
-  toggle(inventory) {
-    this.open = !this.open;
+  // Called when the bag opens.
+  reset(inventory) {
     this.held = -1;
     this.cursor = inventory.selected;
   }
@@ -52,7 +52,12 @@ export class InventoryMenu {
     return -1;
   }
 
-  update(input, inv) {
+  update(input, game) {
+    if (input.wasPressed('inventory') || input.wasPressed('menu')) {
+      game.closeModal(this);
+      return;
+    }
+    const inv = game.inventory;
     const n = inv.slots.length;
     const m = input.mouse;
     if (input.usingMouse && m.inside) {
@@ -78,7 +83,8 @@ export class InventoryMenu {
     }
   }
 
-  draw(ctx, inv) {
+  draw(ctx, game) {
+    const inv = game.inventory;
     const { kit } = this;
     const { font } = kit;
     ctx.fillStyle = 'rgba(29, 21, 32, 0.55)';

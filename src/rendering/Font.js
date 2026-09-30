@@ -178,6 +178,17 @@ export class Font {
     this.draw(ctx, text, x, y, color, align);
   }
 
+  // Text drawn `scale` times larger, centred on x (used for titles and the large-text option).
+  drawScaled(ctx, text, x, y, color, scale, shadow = null) {
+    const w = this.measure(text) * scale;
+    ctx.save();
+    ctx.translate(Math.round(x - w / 2), y);
+    ctx.scale(scale, scale);
+    if (shadow) this.draw(ctx, text, 0, 1, shadow);
+    this.draw(ctx, text, 0, 0, color);
+    ctx.restore();
+  }
+
   // Splits text into lines no wider than maxWidth (respects explicit '\n').
   wrap(text, maxWidth) {
     const lines = [];

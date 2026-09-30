@@ -90,17 +90,31 @@ export class ToolSystem {
     }
     if (!map.inBounds(tx, ty)) return;
     const obj = map.objectAt[map.index(tx, ty)];
-    if (obj && obj.def.examine) {
-      this.faceTarget();
-      game.hud.toast(obj.def.examine);
-      game.dirty = true;
-    }
+    if (!obj) return;
+    this.faceTarget();
+    game.dirty = true;
+    const door = obj.def.door;
+    if (door && tx === obj.x + door.dx && ty === obj.y + door.dy) game.useDoor(door.action, obj);
+    else if (obj.def.examine) game.hud.toast(obj.def.examine);
   }
 
-  // Right click: eat the selected item if it's edible.
+  // True if E would do something at the target (used to let right click interact too).
+  hasInteraction() {
+    const { map } = this.game;
+    const { tx, ty } = this;
+    if (!map.inBounds(tx, ty)) return false;
+    const obj = map.objectAt[map.index(tx, ty)];
+    return !!(obj && (obj.def.door || obj.def.examine));
+  }
+
+  // Right click: interact with doors and signs, otherwise eat the selected item if edible.
   secondary() {
     const { game } = this;
     const { player, inventory, hud } = game;
+    if (this.hasInteraction()) {
+      this.interact();
+      return;
+    }
     const item = inventory.selectedItem;
     if (!item || !item.energy) return;
     if (player.energy >= player.maxEnergy) {

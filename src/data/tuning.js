@@ -12,6 +12,17 @@ export const TOOLS = {
   pickaxe: { energy: 3, cooldown: 0.45 },
 };
 
+// Minutes are counted from midnight of the current day; 26:00 = 2:00 the next morning.
+export const TIME = {
+  dayStart: 6 * 60,
+  dayEnd: 26 * 60,        // the clock stops here
+  minutesPerStep: 10,
+  secondsPerStep: 10,     // real seconds per step (1 in-game hour = 1 real minute)
+  daysPerSeason: 28,
+  eveningStart: 18 * 60,  // the screen starts to dim
+  nightStart: 21 * 60,    // fully dimmed
+};
+
 export const FARMING = {
   // Tilled soil with no crop reverts to plain field after this many nights.
   fallowNights: 3,

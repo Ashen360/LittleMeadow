@@ -29,11 +29,20 @@ Every phase ends playable. We stop and verify before moving on.
 **Deliverable:** Plant → Water → (N) next day → Grow → Harvest. Verified end to end in the
 single-file build (turnip: 4 watered nights → harvest; strawberry regrows 3 days later).
 
-## Phase 2: Time + Save
-Clock HUD (time/day/season) · sleeping at the farmhouse door · day rollover (crop growth,
-unwatering, energy) · `SaveManager` (versioned, migrations, autosave) · title menu with
-Continue / New Game.
-**Deliverable:** several in-game days, safely resumed after a refresh.
+## Phase 2: Time + Save ✅
+- [x] `Clock`: 10 in-game minutes per 10 real seconds, 6:00 start, stops at 2:00 with a
+      gentle message; 28-day seasons, weekdays; HUD panel with date and time
+- [x] Evening light: the screen dims gradually from 18:00 to 21:00
+- [x] Sleeping: E (or right click) on the farmhouse door → "Go to bed?" → fade → new morning
+- [x] Day rollover for every map: crop growth, drying, fallow soil, energy refill
+- [x] `SaveManager`: versioned JSON, chained migrations, temp-key write + backup, falls back
+      to the backup if the main save is unreadable; autosave on sleep, tab hide and page close
+- [x] Title menu (Continue / New game, with an overwrite confirmation) and a pause menu
+      (Esc: Resume / Save and quit to title)
+- [x] N (next day) is now debug-only (`?debug`) and goes through the normal sleep
+
+**Deliverable:** several in-game days, safely resumed after a refresh. Verified: new game →
+till → sleep → reload → Continue restores the date, soil and inventory.
 
 ## Phase 3: Town + Economy
 Town map · map warps with a fade transition · shop UI (buy seeds) · shipping box

@@ -10,6 +10,7 @@ export const DEFAULT_BINDINGS = {
   right: ['KeyD', 'ArrowRight'],
   interact: ['KeyE'],
   use: ['Space'],
+  confirm: ['Enter', 'NumpadEnter'],
   menu: ['Escape'],
   inventory: ['Tab', 'KeyI'],
   nextDay: ['KeyN'], // temporary until sleeping exists (Phase 2)

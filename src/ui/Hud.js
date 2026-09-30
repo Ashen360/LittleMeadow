@@ -15,8 +15,6 @@ export class Hud {
     this.kit = kit;
     this.toastText = '';
     this.toastTime = 0;
-    this.day = 0;
-    this.dayLabel = '';
   }
 
   toast(text, time = 2.2) {
@@ -60,14 +58,14 @@ export class Hud {
     ctx.fillRect(BAR_X + 3, BAR_Y + 3 + inner - fill, BAR_W - 6, fill);
     font.drawShadowed(ctx, 'E', BAR_X + BAR_W / 2, BAR_Y - 9, PAL.cream, PAL.ink, 'center');
 
-    // Day label (the full clock arrives in Phase 2).
-    if (this.day !== game.day) {
-      this.day = game.day;
-      this.dayLabel = `Day ${game.day}`;
-    }
-    const dw = font.measure(this.dayLabel) + 10;
-    kit.panel(ctx, VIEW_W - dw - 4, 4, dw, 13);
-    font.draw(ctx, this.dayLabel, VIEW_W - 9, 7, PAL.cream, 'right');
+    // Clock: date and time (labels are rebuilt by the clock only when they change).
+    const clock = game.clock;
+    const cw = Math.max(font.measure(clock.dateLabel), 40) + 12;
+    const cx = VIEW_W - cw - 4;
+    kit.panel(ctx, cx, 4, cw, 23);
+    const mid = cx + (cw >> 1);
+    font.draw(ctx, clock.dateLabel, mid, 7, PAL.cream, 'center');
+    font.draw(ctx, clock.timeLabel, mid, 16, clock.stopped ? PAL.rose : PAL.sun, 'center');
 
     // Toast.
     if (this.toastTime > 0) {
