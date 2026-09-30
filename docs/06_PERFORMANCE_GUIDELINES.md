@@ -41,4 +41,10 @@ player tile · map id.
 ## Measured
 | Date | Machine | Scene | FPS | CPU ms avg / max | Heap |
 |---|---|---|---|---|---|
-| 2026-10-01 | dev machine, in-app Chromium, 3× render | Farm, walking | see Phase 0 notes in roadmap | | |
+| 2026-10-01 | dev machine, in-app Chromium, 3× render | Farm, walking | 60 | 0.18 / — | 2 MB |
+| 2026-09-30 | cloud container, headless Chromium, 1280×720, 3× render, `dist/LittleMeadow.html` via `file://` | Farm, walking (overlay on) | 60 | 0.41 / 0.60 | 1.9 MB |
+| 2026-09-30 | same | Farm, idle (overlay off) | — (0 redraws in 2 s) | — | — |
+
+Phase 0 notes: the single-file build runs from `file://` with no console errors; 266 map
+entities, 90 sprites drawn per frame at the default camera. Headless Chromium uses software
+rendering, so its CPU numbers are pessimistic compared with a real GPU-backed browser.
