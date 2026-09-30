@@ -24,8 +24,17 @@ src/
   farming/
     Farming.js          soil and crop rules: till, water, plant, grow overnight, harvest
     Tools.js            ToolSystem: targeting and what using an item on the world does
+  npc/
+    Npc.js              a villager: position, path walking, animation, friendship
+    NpcManager.js       schedules, routing across maps, friendship, save state
+    Path.js             BFS on the collision grid
+  dialogue/
+    Dialogue.js         picks the line (intro / tier / again)
   ui/
     UiKit.js            shared panels, slots and item icons
+    MenuBox.js          title / pause / prompts
+    ShopMenu.js         the seed shop
+    DialogueBox.js      portrait, hearts, typewriter pages
     Hud.js              hotbar, energy bar, day label, message toast
     InventoryMenu.js    the bag screen
   rendering/
@@ -41,7 +50,7 @@ src/
 tools/  serve.mjs  build.mjs
 docs/
 ```
-Planned additions per phase: `economy/`, `npc/`, `dialogue/`,
+Planned additions per phase:
 `core/Time.js`, `core/SaveManager.js`, `audio/Audio.js`. Each gets created when its phase
 starts, not before.
 

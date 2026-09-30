@@ -56,11 +56,18 @@ till → sleep → reload → Continue restores the date, soil and inventory.
 **Deliverable:** Farm → Grow → Harvest → Sell → Buy → Farm. Verified: walk to town, buy seeds,
 ship turnips and wood, sleep, get paid, reload with the money kept.
 
-## Phase 4: NPCs
-4 villagers (`data/npcs.js`) · schedule rules (time → map/tile) with simple grid walking
-(BFS on small maps, cached per schedule leg) · dialogue box with portrait and name ·
-friendship points (+ for talking once a day).
-**Deliverable:** the town feels alive.
+## Phase 4: NPCs ✅
+- [x] Marigold, Otto, June and Pip (`data/npcs.js`): homes, daily schedules, original lines
+- [x] Schedules: at each leg's time a villager computes one BFS path (`npc/Path.js`) and walks
+      it, crossing between the farm and town through the same warps as the player; `inside`
+      legs walk home and go indoors; every morning and after loading they snap to schedule
+- [x] Dialogue box: portrait, name, friendship hearts, typewriter text, pages
+- [x] Friendship: +10 for the first chat each day (max 1000 = 10 hearts), three dialogue tiers,
+      an introduction on the first meeting, short "again" lines after the first chat; saved
+- [x] Talk with E, Space / left click or right click on a villager
+
+**Deliverable:** the town feels alive. Verified by simulating a whole day: all 23 schedule legs
+arrive at their targets, none needed the unreachable-target fallback.
 
 ## Phase 5: Polish
 Tool/harvest particles (pooled, capped) · map fade transitions · sound effects plus one

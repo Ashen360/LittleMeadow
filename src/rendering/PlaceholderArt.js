@@ -919,89 +919,201 @@ function tileCursor() {
 
 // ---------------------------------------------------------------- player
 
+const PLAYER_COLORS = {
+  hair: PAL.hair, hairLight: PAL.hairLight, skin: PAL.skin, skinShade: PAL.skinShade,
+  shirt: PAL.shirt, shirtDark: PAL.shirtDark, pants: PAL.pants, pantsDark: PAL.pantsDark,
+  shoes: PAL.shoes, accent: PAL.rose, accentDark: PAL.berry,
+};
+
 // frame: 0 = idle / passing, 1 and 2 = opposite contact poses of the walk cycle.
-function playerFrame(dir, frame) {
+// c = colour scheme (PLAYER_COLORS or a villager's), extra(R, dir, b) draws accessories.
+function playerFrame(dir, frame, c = PLAYER_COLORS, extra = null) {
   const p = new Pen(18, 24);
   const R = (c, x, y, w = 1, h = 1) => p.rect(c, x + 1, y + 1, w, h);
   const b = frame === 0 ? 0 : 1; // body dips on contact frames
 
   if (dir === 'down' || dir === 'up') {
     const liftL = frame === 1 ? 1 : 0, liftR = frame === 2 ? 1 : 0;
-    R(PAL.pants, 5, 17, 3, 3 - liftL);
-    R(PAL.pants, 8, 17, 3, 3 - liftR);
-    R(PAL.pantsDark, 8, 17, 1, 3 - liftR);
-    R(PAL.shoes, 5, 20 - liftL, 3, 2);
-    R(PAL.shoes, 8, 20 - liftR, 3, 2);
+    R(c.pants, 5, 17, 3, 3 - liftL);
+    R(c.pants, 8, 17, 3, 3 - liftR);
+    R(c.pantsDark, 8, 17, 1, 3 - liftR);
+    R(c.shoes, 5, 20 - liftL, 3, 2);
+    R(c.shoes, 8, 20 - liftR, 3, 2);
 
-    R(PAL.shirt, 5, 12 + b, 6, 4);
-    R(PAL.shirtDark, 10, 12 + b, 1, 4);
-    R(PAL.pants, 5, 16 + b, 6, 1);
-    R(PAL.shirt, 4, 12 + b, 1, 3);
-    R(PAL.shirtDark, 11, 12 + b, 1, 3);
-    R(PAL.skin, 4, 15 + b, 1, 1);
-    R(PAL.skin, 11, 15 + b, 1, 1);
+    R(c.shirt, 5, 12 + b, 6, 4);
+    R(c.shirtDark, 10, 12 + b, 1, 4);
+    R(c.pants, 5, 16 + b, 6, 1);
+    R(c.shirt, 4, 12 + b, 1, 3);
+    R(c.shirtDark, 11, 12 + b, 1, 3);
+    R(c.skin, 4, 15 + b, 1, 1);
+    R(c.skin, 11, 15 + b, 1, 1);
 
-    R(PAL.hair, 5, 2 + b, 6, 1);
-    R(PAL.hair, 4, 3 + b, 8, 4);
-    R(PAL.hairLight, 6, 3 + b, 3, 1);
+    R(c.hair, 5, 2 + b, 6, 1);
+    R(c.hair, 4, 3 + b, 8, 4);
+    R(c.hairLight, 6, 3 + b, 3, 1);
     if (dir === 'down') {
-      R(PAL.hair, 4, 7 + b, 1, 3);
-      R(PAL.hair, 11, 7 + b, 1, 3);
-      R(PAL.skin, 5, 7 + b, 6, 3);
-      R(PAL.skin, 6, 10 + b, 4, 1);
-      R(PAL.hair, 5, 7 + b, 1, 1);
-      R(PAL.hair, 9, 7 + b, 2, 1);
+      R(c.hair, 4, 7 + b, 1, 3);
+      R(c.hair, 11, 7 + b, 1, 3);
+      R(c.skin, 5, 7 + b, 6, 3);
+      R(c.skin, 6, 10 + b, 4, 1);
+      R(c.hair, 5, 7 + b, 1, 1);
+      R(c.hair, 9, 7 + b, 2, 1);
       R(PAL.ink, 6, 8 + b, 1, 1);
       R(PAL.ink, 9, 8 + b, 1, 1);
-      R(PAL.rose, 5, 9 + b, 1, 1);
-      R(PAL.rose, 10, 9 + b, 1, 1);
-      R(PAL.rose, 5, 11 + b, 6, 1);
-      R(PAL.rose, 9, 12 + b, 1, 2);
-      R(PAL.berry, 10, 12 + b, 1, 1);
+      R(c.accent, 5, 9 + b, 1, 1);
+      R(c.accent, 10, 9 + b, 1, 1);
+      R(c.accent, 5, 11 + b, 6, 1);
+      R(c.accent, 9, 12 + b, 1, 2);
+      R(c.accentDark, 10, 12 + b, 1, 1);
     } else {
-      R(PAL.hair, 4, 7 + b, 8, 3);
-      R(PAL.hair, 5, 10 + b, 6, 1);
-      R(PAL.hairLight, 5, 5 + b, 1, 3);
-      R(PAL.rose, 5, 11 + b, 6, 1);
-      R(PAL.rose, 6, 12 + b, 1, 2);
+      R(c.hair, 4, 7 + b, 8, 3);
+      R(c.hair, 5, 10 + b, 6, 1);
+      R(c.hairLight, 5, 5 + b, 1, 3);
+      R(c.accent, 5, 11 + b, 6, 1);
+      R(c.accent, 6, 12 + b, 1, 2);
     }
   } else {
     // Authored facing left; 'right' is mirrored by the caller.
     if (frame === 0) {
-      R(PAL.pants, 6, 17, 4, 3);
-      R(PAL.pantsDark, 8, 17, 1, 3);
-      R(PAL.shoes, 5, 20, 5, 2);
+      R(c.pants, 6, 17, 4, 3);
+      R(c.pantsDark, 8, 17, 1, 3);
+      R(c.shoes, 5, 20, 5, 2);
     } else {
       const fwd = frame === 1;
       // back leg first (darker), then the front leg
-      R(PAL.pantsDark, fwd ? 8 : 4, 17, 3, fwd ? 2 : 3);
-      R(PAL.shoes, fwd ? 9 : 3, fwd ? 19 : 20, 3, 2);
-      R(PAL.pants, fwd ? 4 : 8, 17, 3, fwd ? 3 : 2);
-      R(PAL.shoes, fwd ? 3 : 8, fwd ? 20 : 19, fwd ? 4 : 3, 2);
+      R(c.pantsDark, fwd ? 8 : 4, 17, 3, fwd ? 2 : 3);
+      R(c.shoes, fwd ? 9 : 3, fwd ? 19 : 20, 3, 2);
+      R(c.pants, fwd ? 4 : 8, 17, 3, fwd ? 3 : 2);
+      R(c.shoes, fwd ? 3 : 8, fwd ? 20 : 19, fwd ? 4 : 3, 2);
     }
-    R(PAL.shirt, 6, 12 + b, 4, 4);
-    R(PAL.shirtDark, 9, 12 + b, 1, 4);
-    R(PAL.pants, 6, 16 + b, 4, 1);
+    R(c.shirt, 6, 12 + b, 4, 4);
+    R(c.shirtDark, 9, 12 + b, 1, 4);
+    R(c.pants, 6, 16 + b, 4, 1);
     const armX = frame === 1 ? 8 : frame === 2 ? 6 : 7;
-    R(PAL.shirtDark, armX, 12 + b, 2, 3);
-    R(PAL.skin, armX, 15 + b, 2, 1);
+    R(c.shirtDark, armX, 12 + b, 2, 3);
+    R(c.skin, armX, 15 + b, 2, 1);
 
-    R(PAL.hair, 5, 2 + b, 6, 1);
-    R(PAL.hair, 4, 3 + b, 8, 4);
-    R(PAL.hairLight, 5, 3 + b, 3, 1);
-    R(PAL.hair, 8, 7 + b, 4, 3);
-    R(PAL.skin, 4, 7 + b, 4, 3);
-    R(PAL.skin, 5, 10 + b, 4, 1);
-    R(PAL.skin, 3, 8 + b, 1, 1);
-    R(PAL.hair, 4, 7 + b, 1, 1);
-    R(PAL.skinShade, 8, 8 + b, 1, 1);
+    R(c.hair, 5, 2 + b, 6, 1);
+    R(c.hair, 4, 3 + b, 8, 4);
+    R(c.hairLight, 5, 3 + b, 3, 1);
+    R(c.hair, 8, 7 + b, 4, 3);
+    R(c.skin, 4, 7 + b, 4, 3);
+    R(c.skin, 5, 10 + b, 4, 1);
+    R(c.skin, 3, 8 + b, 1, 1);
+    R(c.hair, 4, 7 + b, 1, 1);
+    R(c.skinShade, 8, 8 + b, 1, 1);
     R(PAL.ink, 5, 8 + b, 1, 1);
-    R(PAL.rose, 6, 9 + b, 1, 1);
-    R(PAL.rose, 5, 11 + b, 6, 1);
-    R(PAL.rose, 10, 12 + b, 1, 2);
+    R(c.accent, 6, 9 + b, 1, 1);
+    R(c.accent, 5, 11 + b, 6, 1);
+    R(c.accent, 10, 12 + b, 1, 2);
   }
+  if (extra) extra(R, dir, b);
   p.outline();
   return p;
+}
+
+// ---------------------------------------------------------------- villagers
+
+// Colour schemes, sprite accessories and portrait extras per villager id (see data/npcs.js).
+const VILLAGERS = {
+  marigold: {
+    c: {
+      hair: PAL.roofDark, hairLight: PAL.roof, skin: PAL.skin, skinShade: PAL.skinShade,
+      shirt: PAL.leaf, shirtDark: PAL.leafDark, pants: PAL.leafDark, pantsDark: PAL.leafDeep,
+      shoes: PAL.bark, accent: PAL.cream, accentDark: PAL.straw,
+    },
+    bg: PAL.peach,
+    extra: (R, dir, b) => {
+      R(PAL.roofDark, 6, 0 + b, 4, 2); // hair bun
+      if (dir === 'down') R(PAL.cream, 6, 13 + b, 4, 4); // apron
+    },
+    portrait: (p) => {
+      p.ellipse(PAL.roofDark, 20, 5, 5, 4);
+      p.rect(PAL.cream, 14, 33, 12, 7);
+    },
+  },
+  otto: {
+    c: {
+      hair: PAL.stoneLight, hairLight: PAL.white, skin: PAL.skin, skinShade: PAL.skinShade,
+      shirt: PAL.woodLight, shirtDark: PAL.wood, pants: PAL.stoneDark, pantsDark: PAL.plumDark,
+      shoes: PAL.barkDark, accent: PAL.leaf, accentDark: PAL.leafDark,
+    },
+    bg: PAL.grassLight,
+    extra: (R, dir, b) => {
+      if (dir === 'down') R(PAL.stoneLight, 5, 10 + b, 6, 2); // beard
+      if (dir === 'left') R(PAL.stoneLight, 4, 10 + b, 4, 1);
+    },
+    portrait: (p) => {
+      p.ellipse(PAL.stoneLight, 20, 28, 8, 5);
+      p.rect(PAL.skin, 17, 25, 6, 1);
+      p.rect(PAL.berry, 18, 26, 4, 1);
+      p.rect(PAL.stoneDark, 13, 18, 6, 1);
+      p.rect(PAL.stoneDark, 21, 18, 6, 1);
+      p.rect(PAL.stoneDark, 19, 19, 2, 1);
+    },
+  },
+  june: {
+    c: {
+      hair: PAL.plumDark, hairLight: PAL.plum, skin: PAL.skinShade, skinShade: PAL.dirtLight,
+      shirt: PAL.water, shirtDark: PAL.waterDeep, pants: PAL.pantsDark, pantsDark: PAL.ink,
+      shoes: PAL.rose, accent: PAL.sun, accentDark: PAL.straw,
+    },
+    bg: PAL.waterLight,
+    extra: (R, dir, b) => {
+      R(PAL.waterDeep, 4, 1 + b, 8, 3); // cap
+      R(PAL.sun, 7, 2 + b, 2, 1);
+      if (dir === 'left') R(PAL.waterDeep, 2, 3 + b, 3, 1);
+      if (dir === 'down') R(PAL.waterDeep, 4, 4 + b, 8, 1);
+    },
+    portrait: (p) => {
+      p.ellipse(PAL.waterDeep, 20, 9, 13, 6);
+      p.rect(PAL.waterDeep, 7, 12, 26, 2);
+      p.rect(PAL.sun, 18, 6, 4, 3);
+    },
+  },
+  pip: {
+    c: {
+      hair: PAL.straw, hairLight: PAL.sun, skin: PAL.skin, skinShade: PAL.skinShade,
+      shirt: PAL.rose, shirtDark: PAL.berry, pants: PAL.water, pantsDark: PAL.waterDeep,
+      shoes: PAL.bark, accent: PAL.cream, accentDark: PAL.pathLight,
+    },
+    bg: PAL.sun,
+    extra: (R, dir, b) => {
+      R(PAL.cream, 5, 14 + b, 6, 1); // stripes
+      R(PAL.straw, 7, 1 + b, 1, 1); // cowlick
+    },
+    portrait: (p) => {
+      for (const [x, y] of [[14, 23], [16, 24], [24, 23], [26, 24]]) p.rect(PAL.dirt, x, y);
+      p.rect(PAL.straw, 21, 3, 2, 4);
+      p.rect(PAL.cream, 8, 36, 24, 1);
+    },
+  },
+};
+
+// A 40x40 head-and-shoulders portrait for the dialogue box.
+function portrait(c, bg, extra) {
+  const p = new Pen(40, 40);
+  p.rect(bg, 0, 0, 40, 40);
+  p.ellipse(c.shirtDark, 20, 45, 18, 13);
+  p.ellipse(c.shirt, 20, 45, 16, 12);
+  p.rect(c.skinShade, 16, 28, 8, 5);
+  p.ellipse(c.hair, 20, 18, 13, 13);
+  p.ellipse(c.skin, 20, 21, 10, 11);
+  p.shade((x, y) => {
+    const dx = (x + 0.5 - 20) / 11, dy = (y + 0.5 - 12) / 6;
+    return y < 15 && dx * dx + dy * dy <= 1 ? c.hair : null;
+  });
+  p.rect(c.hairLight, 15, 8, 6, 1);
+  p.rect(PAL.ink, 15, 19, 2, 3);
+  p.rect(PAL.ink, 23, 19, 2, 3);
+  p.rect(PAL.white, 15, 19);
+  p.rect(PAL.white, 23, 19);
+  p.rect(PAL.rose, 12, 24, 3, 1);
+  p.rect(PAL.rose, 25, 24, 3, 1);
+  p.rect(PAL.berry, 18, 27, 4, 1);
+  p.rect(c.accent, 15, 32, 10, 2);
+  if (extra) extra(p);
+  return p.canvas;
 }
 
 // ---------------------------------------------------------------- registration
@@ -1075,5 +1187,16 @@ export function buildPlaceholderArt(atlas) {
       atlas.add(`player.${dir}.${f}`, pen.canvas, 9, 23);
       if (dir === 'left') atlas.add(`player.right.${f}`, pen.flipX().canvas, 9, 23);
     }
+  }
+
+  for (const [id, v] of Object.entries(VILLAGERS)) {
+    for (const dir of ['down', 'up', 'left']) {
+      for (let f = 0; f < 3; f++) {
+        const pen = playerFrame(dir, f, v.c, v.extra);
+        atlas.add(`npc.${id}.${dir}.${f}`, pen.canvas, 9, 23);
+        if (dir === 'left') atlas.add(`npc.${id}.right.${f}`, pen.flipX().canvas, 9, 23);
+      }
+    }
+    atlas.add(`portrait.${id}`, portrait(v.c, v.bg, v.portrait));
   }
 }

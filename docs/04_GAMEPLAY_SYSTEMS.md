@@ -87,8 +87,22 @@ one, Shift buys five; it refuses when you can't afford it or the bag is full.
 hands it gives back the most recent stack. Everything in the box is sold overnight for
 `sellPrice × qty`, and a summary greets you in the morning.
 
-## NPCs & dialogue 🔜 (Phase 4)
-Schedule = list of `{ time, map, x, y, facing }`. At each time boundary the NPC paths to the
-target with BFS on the tile grid, computed once per leg. Dialogue = lines chosen by
-`(npc, friendship tier, day parity)`, falling back to generic lines. Talking once per day
-gives +10 friendship (max 1000, shown as hearts).
+## NPCs & dialogue ✅
+Schedule = list of `{ time, map, x, y, facing }` or `{ time, inside: true }` (go home and
+disappear indoors). At each leg's start the villager computes one BFS path over the map's
+collision grid (4-directional) to the target. If the target is on another map, it paths to that
+map's warp strip, appears at the other side and paths again. Villagers keep walking while you're
+on another map (only while the clock runs), and walk through the player, so nobody gets stuck.
+If a target is unreachable they skip straight to it. Each morning and on load they snap to the
+schedule.
+| Villager | Day |
+|---|---|
+| Marigold | outside the store 8:20–17:10, fountain in the evening, home 20:30 |
+| Otto | flowerbeds 7:30 and 10:30, the bench 13:00, south beds 17:00, home 19:00 |
+| June | your mailbox 7:00, the farm road 8:30, town roads 10:00–18:30, then home |
+| Pip | the fountain 8:30, your pond 12:30, the square 15:30, home 19:00 |
+
+Dialogue (`dialogue/Dialogue.js`): the very first chat uses the introduction (tier 0, first
+line); later first-chats-of-the-day use the friendship tier's lines (100+ points = tier 1,
+300+ = tier 2), rotating by day; further chats that day use short `again` lines. Talking once
+per day gives +10 friendship (max 1000, shown as 10 hearts). A `|` in a line starts a new page.

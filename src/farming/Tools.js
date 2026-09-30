@@ -66,6 +66,11 @@ export class ToolSystem {
     this.faceTarget();
     game.dirty = true;
 
+    const npc = game.npcs.at(map.id, tx, ty);
+    if (npc) {
+      game.talkTo(npc);
+      return;
+    }
     const crop = farming.cropAtTile(map, tx, ty);
     if (crop && farming.isMature(crop)) {
       this.harvest(crop);
@@ -82,6 +87,12 @@ export class ToolSystem {
     const { game } = this;
     const { map, farming } = game;
     const { tx, ty } = this;
+    const npc = game.npcs.at(map.id, tx, ty);
+    if (npc) {
+      this.faceTarget();
+      game.talkTo(npc);
+      return;
+    }
     const crop = farming.cropAtTile(map, tx, ty);
     if (crop && farming.isMature(crop)) {
       this.faceTarget();
@@ -103,6 +114,7 @@ export class ToolSystem {
     const { map } = this.game;
     const { tx, ty } = this;
     if (!map.inBounds(tx, ty)) return false;
+    if (this.game.npcs.at(map.id, tx, ty)) return true;
     const obj = map.objectAt[map.index(tx, ty)];
     return !!(obj && (obj.def.use || obj.def.examine));
   }

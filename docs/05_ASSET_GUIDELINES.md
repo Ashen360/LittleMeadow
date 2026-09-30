@@ -42,6 +42,9 @@ Phase 3 additions (anchor = bottom centre of the object's area, like other objec
 `tile.plaza0..1`, `obj.store` (6×5 area, 98×86), `obj.cottage.{rose,moss,sky}` (4×4, 66×70),
 `obj.fountain` (3×2), `obj.bench` (2×1), `obj.lamp`, `obj.flowerbed`.
 
+Phase 4 additions: `npc.<id>.{down,left,right,up}.{0,1,2}` (18×24, feet (9, 23), like the
+player) and `portrait.<id>` (40×40, top-left) for `marigold`, `otto`, `june`, `pip`.
+
 ## Replacing placeholder art
 1. Draw sprites into one PNG sheet (≤ 1024×1024, power of two not required).
 2. Write `assets/atlas.json`: `{ "obj.tree": { "x":0, "y":0, "w":34, "h":46, "ax":17, "ay":43 }, … }`.

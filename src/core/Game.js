@@ -20,6 +20,9 @@ import { Hud } from '../ui/Hud.js';
 import { InventoryMenu } from '../ui/InventoryMenu.js';
 import { MenuBox } from '../ui/MenuBox.js';
 import { ShopMenu } from '../ui/ShopMenu.js';
+import { DialogueBox } from '../ui/DialogueBox.js';
+import { NpcManager } from '../npc/NpcManager.js';
+import { chooseLine } from '../dialogue/Dialogue.js';
 import { Input } from './Input.js';
 import { GameLoop } from './GameLoop.js';
 import { Debug } from './Debug.js';
@@ -48,13 +51,16 @@ export class Game {
     this.effects = new Effects();
     this.fade = new Fade();
     this.player = new Player(this.atlas);
-    this.entities = [this.player];
+    this.npcs = new NpcManager(this.atlas);
+    this.entities = [this.player, ...this.npcs.list];
+    this.frameDt = 0;
     this.farming = new Farming(this.atlas);
     this.tools = new ToolSystem(this);
     this.ui = new UiKit(this.atlas, this.font);
     this.hud = new Hud(this.ui);
     this.bag = new InventoryMenu(this.ui);
     this.shop = new ShopMenu(this.ui);
+    this.dialogue = new DialogueBox(this.ui, this.atlas);
     this.modals = [];
     this.cursorSprite = this.atlas.get('ui.cursor');
     this.changedTiles = [];
@@ -106,6 +112,8 @@ export class Game {
     this.shipping = []; // [{ id, qty }] sold overnight
     this.player.energy = this.player.maxEnergy;
     this.player.action = null;
+    this.npcs.loadState(null);
+    this.npcs.resetDay(this.clock.minutes);
     this.placePlayer(HOME.map, HOME.x, HOME.y, HOME.facing);
   }
 
@@ -130,6 +138,7 @@ export class Game {
       inventory: { selected: this.inventory.selected, slots: this.inventory.slots },
       money: this.money,
       shipping: this.shipping,
+      npcs: this.npcs.saveState(),
       maps,
     };
   }
@@ -150,6 +159,8 @@ export class Game {
     inv.selected = Math.min(data.inventory.selected || 0, INVENTORY.hotbar - 1);
     this.money = data.money ?? ECONOMY.startMoney;
     this.shipping = (data.shipping || []).filter((e) => ITEMS[e.id]).map((e) => ({ id: e.id, qty: e.qty }));
+    this.npcs.loadState(data.npcs);
+    this.npcs.resetDay(this.clock.minutes);
     const p = data.player;
     const mapId = this.maps[p.map] ? p.map : HOME.map;
     this.placePlayer(mapId, 0, 0, p.facing);
@@ -325,6 +336,21 @@ export class Game {
     if (this.audio) this.audio.play('ship');
   }
 
+  talkTo(npc) {
+    const p = this.player;
+    // Face each other.
+    const dx = p.x - npc.x, dy = p.y - npc.y;
+    if (Math.abs(dx) > Math.abs(dy)) npc.facing = dx < 0 ? 1 : 2;
+    else npc.facing = dy < 0 ? 3 : 0;
+    const firstEver = npc.friendship === 0 && npc.talkedDay === 0;
+    const firstToday = this.npcs.talked(npc, this.day);
+    const text = chooseLine(npc, this.npcs.tier(npc), this.day, firstToday, firstEver);
+    if (firstToday) this.effects.float('♥', npc.x, npc.y - 30, PAL.rose);
+    this.dialogue.open(npc, text);
+    this.openModal(this.dialogue);
+    if (this.audio) this.audio.play('talk');
+  }
+
   // Steps onto a warp tile: fade and move to the other map.
   warp(w) {
     const ox = this.player.tileX - w.x, oy = this.player.tileY - w.y;
@@ -364,6 +390,7 @@ export class Game {
       for (const i of this.changedTiles) this.renderer.redrawTile(map, i % map.w, Math.floor(i / map.w));
     }
     this.clock.newDay();
+    this.npcs.resetDay(this.clock.minutes);
     this.player.energy = this.player.maxEnergy;
     this.player.action = null;
     this.placePlayer(HOME.map, HOME.x, HOME.y, HOME.facing);
@@ -380,6 +407,7 @@ export class Game {
   tick(dt) {
     const t0 = performance.now();
     const input = this.input;
+    this.frameDt = dt;
 
     if (input.wasPressed('debug')) {
       this.debug.visible = !this.debug.visible;
@@ -440,6 +468,7 @@ export class Game {
     const step = this.clock.update(dt);
     if (step) this.dirty = true;
     if (step === 'stopped') this.hud.toast('It\'s very late... time to head home to bed.', 5);
+    if (this.npcs.update(dt, this)) this.dirty = true;
   }
 
   // Number keys, the mouse wheel and clicks on the hotbar pick the selected slot.

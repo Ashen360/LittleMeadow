@@ -170,7 +170,10 @@ export class Renderer {
       if (c.px < left || c.px > right || c.py < top || c.py > bottom) continue;
       list.push(c);
     }
-    for (const e of game.entities) list.push(e);
+    for (const e of game.entities) {
+      if (e.hidden || (e.mapId !== undefined && e.mapId !== map.id)) continue;
+      list.push(e);
+    }
     list.sort(bySortY);
 
     for (const item of list) {

@@ -31,6 +31,19 @@ export const ECONOMY = {
   shopStock: ['turnipSeeds', 'potatoSeeds', 'strawberrySeeds'],
 };
 
+export const NPC = {
+  speed: 40,              // px per second (a little slower than the player)
+};
+
+// Friendship points: +perTalk for the first chat each day, up to max. One heart = 100 points.
+// tiers: the minimum points for dialogue tier 0, 1, 2.
+export const FRIENDSHIP = {
+  perTalk: 10,
+  max: 1000,
+  heart: 100,
+  tiers: [0, 100, 300],
+};
+
 export const FARMING = {
   // Tilled soil with no crop reverts to plain field after this many nights.
   fallowNights: 3,
