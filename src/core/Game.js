@@ -1,7 +1,7 @@
 // Owns every system and runs the per-frame tick. Draws only when something changed.
 // Menus (title, pause, bag, prompts) are modals: while one is open the world and clock pause.
 
-import { MAX_STEP, TILE, VIEW_W, VIEW_H } from '../config.js';
+import { MAX_STEP, MAX_RENDER_SCALE, TILE, VIEW_W, VIEW_H } from '../config.js';
 import { Atlas } from '../rendering/Atlas.js';
 import { buildPlaceholderArt } from '../rendering/PlaceholderArt.js';
 import { Font } from '../rendering/Font.js';
@@ -21,9 +21,13 @@ import { InventoryMenu } from '../ui/InventoryMenu.js';
 import { MenuBox } from '../ui/MenuBox.js';
 import { ShopMenu } from '../ui/ShopMenu.js';
 import { DialogueBox } from '../ui/DialogueBox.js';
+import { SettingsMenu } from '../ui/SettingsMenu.js';
+import { KeybindMenu } from '../ui/KeybindMenu.js';
+import { Audio } from '../audio/Audio.js';
+import { loadSettings, saveSettings } from './Settings.js';
 import { NpcManager } from '../npc/NpcManager.js';
 import { chooseLine } from '../dialogue/Dialogue.js';
-import { Input } from './Input.js';
+import { Input, DEFAULT_BINDINGS } from './Input.js';
 import { GameLoop } from './GameLoop.js';
 import { Debug } from './Debug.js';
 import { Clock } from './Clock.js';
@@ -40,6 +44,8 @@ const HOME = { map: 'farm', x: 6, y: 7, facing: 0 }; // where you wake up: outsi
 export class Game {
   constructor(canvas, options = {}) {
     this.options = options;
+    this.settings = loadSettings();
+    this.audio = new Audio(this.settings);
     this.atlas = new Atlas();
     buildPlaceholderArt(this.atlas);
     this.font = new Font();
@@ -69,7 +75,14 @@ export class Game {
     this.loop = new GameLoop((dt) => this.tick(dt));
 
     this.resetWorld();
+    this.applySettings();
+    this.audio.darkness = () => this.clock.darkness;
     this.openTitle();
+
+    // Browsers only allow sound after a user gesture.
+    const unlock = () => this.audio.unlock();
+    window.addEventListener('keydown', unlock, { once: true });
+    window.addEventListener('mousedown', unlock, { once: true });
 
     // Autosave when the tab is hidden or closed, so a refresh never loses progress.
     const autosave = () => { if (document.visibilityState === 'hidden') this.save(); };
@@ -200,6 +213,66 @@ export class Game {
     this.dirty = true;
   }
 
+  // ------------------------------------------------------------------ settings
+
+  // Applies (and stores) the current settings: key bindings, render scale, volumes.
+  applySettings() {
+    const s = this.settings;
+    this.input.setBindings({ ...DEFAULT_BINDINGS, ...s.bindings });
+    const scale = this.options.lowres ? 1 : s.renderScale || MAX_RENDER_SCALE;
+    if (scale !== this.renderer.maxRenderScale) {
+      this.renderer.maxRenderScale = scale;
+      this.renderer.resize();
+    }
+    this.audio.applyVolumes();
+    saveSettings(s);
+    this.dirty = true;
+  }
+
+  openSettings() {
+    this.openModal(new SettingsMenu(this.ui, this, !this.started));
+  }
+
+  openKeybinds() {
+    this.openModal(new KeybindMenu(this.ui, this));
+  }
+
+  // Downloads the current save as a JSON file (a backup the browser can't clear).
+  exportSave() {
+    this.save();
+    const text = SaveManager.exportText();
+    if (!text) {
+      this.ask('There is no save yet. Start a farm first!', [{ label: 'OK' }]);
+      return;
+    }
+    const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `little-meadow-day-${this.clock.day}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  // Title screen only: replaces the stored save with one picked from disk.
+  importSave() {
+    const picker = document.createElement('input');
+    picker.type = 'file';
+    picker.accept = '.json,application/json';
+    picker.addEventListener('change', () => {
+      const file = picker.files && picker.files[0];
+      if (!file) return;
+      file.text().then((text) => {
+        const err = SaveManager.importText(text);
+        this.closeAllModals();
+        this.openTitle();
+        this.ask(err || 'Save imported! Choose Continue to play it.', [{ label: 'OK' }]);
+      });
+    });
+    picker.click();
+  }
+
   // A yes/no style prompt. choices: [{ label, action }]; Esc = the last choice's label only.
   ask(text, choices) {
     const box = new MenuBox(this.ui, {
@@ -226,6 +299,7 @@ export class Game {
           ]);
         },
       },
+      { label: 'Settings', action: () => this.openSettings() },
     ];
     this.titleMenu = new MenuBox(this.ui, {
       title: 'Little Meadow',
@@ -243,6 +317,7 @@ export class Game {
       title: 'Paused',
       items: [
         { label: 'Resume', action: () => this.closeModal(box) },
+        { label: 'Settings', action: () => this.openSettings() },
         {
           label: 'Save and quit to title',
           action: () => {
@@ -301,6 +376,7 @@ export class Game {
       } else {
         this.shop.reset();
         this.openModal(this.shop);
+        this.audio.play('door');
       }
     } else if (action === 'ship') {
       this.shipSelected();
@@ -333,7 +409,7 @@ export class Game {
     this.hud.toast(`Shipped ${slot.qty} ${item.name} (${slot.qty * item.sellPrice}g, paid overnight).`, 3);
     this.effects.float(`${slot.qty * item.sellPrice}g`, this.player.x, this.player.y - 28, PAL.sun);
     inv.slots[inv.selected] = null;
-    if (this.audio) this.audio.play('ship');
+    this.audio.play('ship');
   }
 
   talkTo(npc) {
@@ -346,18 +422,20 @@ export class Game {
     const firstToday = this.npcs.talked(npc, this.day);
     const text = chooseLine(npc, this.npcs.tier(npc), this.day, firstToday, firstEver);
     if (firstToday) this.effects.float('♥', npc.x, npc.y - 30, PAL.rose);
-    this.dialogue.open(npc, text);
+    this.dialogue.open(npc, text, this.settings.largeText);
     this.openModal(this.dialogue);
-    if (this.audio) this.audio.play('talk');
+    this.audio.play('talk');
   }
 
   // Steps onto a warp tile: fade and move to the other map.
   warp(w) {
     const ox = this.player.tileX - w.x, oy = this.player.tileY - w.y;
+    this.audio.play('door');
     this.fade.start(() => this.placePlayer(w.to, w.tx + ox, w.ty + oy, w.facing));
   }
 
   sleep() {
+    this.audio.play('sleep');
     let sales = null;
     this.fade.start(() => { sales = this.endDay(); }, () => {
       if (sales) this.ask(sales, [{ label: 'Lovely' }]);
@@ -490,6 +568,7 @@ export class Game {
       inv.selected = sel;
       const s = inv.slots[sel];
       this.hud.toast(s ? ITEMS[s.id].name : 'Empty hands', 1.2);
+      this.audio.play('select');
       this.dirty = true;
     }
   }

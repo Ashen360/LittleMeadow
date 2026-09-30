@@ -16,6 +16,11 @@ src/
     GameLoop.js         requestAnimationFrame driver, dt clamping
     Input.js            keyboard/mouse/wheel → named actions (rebindable)
     Debug.js            FPS / frame-time / memory overlay
+    Clock.js            calendar, 10-minute steps, evening darkness
+    SaveManager.js      versioned saves, backup, migrations, export/import
+    Settings.js         player settings (volumes, scale, accessibility, bindings)
+  audio/
+    Audio.js            synthesized WebAudio sound effects and generative music
   world/
     GameMap.js          tile layers, objects, collision queries
   player/
@@ -35,13 +40,16 @@ src/
     MenuBox.js          title / pause / prompts
     ShopMenu.js         the seed shop
     DialogueBox.js      portrait, hearts, typewriter pages
+    SettingsMenu.js     settings screen
+    KeybindMenu.js      key rebinding
     Hud.js              hotbar, energy bar, day label, message toast
     InventoryMenu.js    the bag screen
   rendering/
     Renderer.js         canvas scaling, ground baking, y-sorted sprites, UI pass
     Camera.js           follow + clamp to map bounds
     Atlas.js            named sprite regions in one texture
-    Effects.js          pooled floating text and object shakes
+    Effects.js          pooled floating text, particles and object shakes
+    Fade.js             full-screen fade with mid / done callbacks
     PlaceholderArt.js   procedural placeholder sprites (replaceable)
     Font.js             original 5 px bitmap font
     palette.js          the colour palette
@@ -50,7 +58,7 @@ src/
 tools/  serve.mjs  build.mjs
 docs/
 ```
-Planned additions per phase:
+Every planned module now exists.
 `core/Time.js`, `core/SaveManager.js`, `audio/Audio.js`. Each gets created when its phase
 starts, not before.
 

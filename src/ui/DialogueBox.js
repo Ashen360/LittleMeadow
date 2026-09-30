@@ -28,14 +28,17 @@ export class DialogueBox {
     this.portrait = null;
   }
 
-  open(npc, text) {
+  // large: the large-text setting (2x text, two lines per page).
+  open(npc, text, large = false) {
     this.npc = npc;
+    this.large = large;
     this.portrait = this.atlas.get(`portrait.${npc.id}`);
     this.pages = [];
     const font = this.kit.font;
     for (const para of text.split('|')) {
-      const lines = font.wrap(para, TEXT_W);
-      for (let i = 0; i < lines.length; i += LINES_PER_PAGE) this.pages.push(lines.slice(i, i + LINES_PER_PAGE));
+      const per = large ? 2 : LINES_PER_PAGE;
+      const lines = font.wrap(para, large ? TEXT_W / 2 : TEXT_W);
+      for (let i = 0; i < lines.length; i += per) this.pages.push(lines.slice(i, i + per));
     }
     this.setPage(0);
   }
@@ -52,7 +55,7 @@ export class DialogueBox {
 
   update(input, game) {
     if (this.typing) {
-      this.shown = Math.min(this.pageLength, this.shown + game.frameDt * CHARS_PER_SECOND * (game.settings ? game.settings.textSpeed : 1));
+      this.shown = Math.min(this.pageLength, this.shown + game.frameDt * CHARS_PER_SECOND);
       game.dirty = true;
     }
     if (input.wasPressed('menu')) {
@@ -93,11 +96,12 @@ export class DialogueBox {
       const line = lines[i];
       const text = left >= line.length ? line : line.slice(0, left);
       left -= line.length;
-      font.draw(ctx, text, TEXT_X, BOX_Y + 18 + i * LINE_H, PAL.cream);
+      if (this.large) font.drawScaled(ctx, text, TEXT_X, BOX_Y + 17 + i * 17, PAL.cream, 2, null, 'left');
+      else font.draw(ctx, text, TEXT_X, BOX_Y + 18 + i * LINE_H, PAL.cream);
     }
     if (!this.typing) {
       const more = this.page + 1 < this.pages.length;
-      font.draw(ctx, more ? 'E: more' : 'E: close', BOX_X + BOX_W - 8, BOX_Y + BOX_H - 11, PAL.dirtLight, 'right');
+      font.draw(ctx, more ? 'E: more' : 'E: close', BOX_X + BOX_W - 8, BOX_Y + BOX_H - 9, PAL.dirtLight, 'right');
     }
   }
 }

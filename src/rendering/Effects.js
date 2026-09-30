@@ -1,11 +1,13 @@
-// Short-lived feedback: floating text ("+1 Wood") and object shakes on tool hits.
-// Floaters come from a fixed pool, so nothing is allocated while effects run.
+// Short-lived feedback: floating text ("+1 Wood"), object shakes on tool hits, and small
+// particle bursts (dust, droplets, chips, sparkles). Floaters and particles come from fixed
+// pools (capped), so nothing is allocated while effects run.
 
 import { PAL } from './palette.js';
 
 const MAX_FLOATERS = 16;
 const FLOAT_TIME = 0.9;
 const FLOAT_RISE = 12;
+const MAX_PARTICLES = 64;
 
 export class Effects {
   constructor() {
@@ -14,6 +16,30 @@ export class Effects {
       this.floaters.push({ active: false, text: '', color: '', x: 0, y: 0, t: 0 });
     }
     this.shaking = [];
+    this.particles = [];
+    for (let i = 0; i < MAX_PARTICLES; i++) {
+      this.particles.push({ active: false, x: 0, y: 0, vx: 0, vy: 0, t: 0, life: 0, color: '', size: 1, gravity: 0, floor: 0 });
+    }
+    this.nextParticle = 0;
+  }
+
+  // A burst of n particles at world (x, y). Particles fall back to `y` (the ground) and stop.
+  burst(x, y, color, n = 6, { speed = 40, up = 45, gravity = 200, life = 0.45, size = 1 } = {}) {
+    for (let i = 0; i < n; i++) {
+      const p = this.particles[this.nextParticle];
+      this.nextParticle = (this.nextParticle + 1) % MAX_PARTICLES; // the oldest gets reused
+      p.active = true;
+      p.x = x + (Math.random() - 0.5) * 6;
+      p.y = y - Math.random() * 3;
+      p.floor = y + 2;
+      p.vx = (Math.random() - 0.5) * speed * 2;
+      p.vy = -up * (0.5 + Math.random() * 0.7);
+      p.t = 0;
+      p.life = life * (0.7 + Math.random() * 0.6);
+      p.color = color;
+      p.size = size;
+      p.gravity = gravity;
+    }
   }
 
   // Text that rises from world position (x, y) and fades.
@@ -45,6 +71,18 @@ export class Effects {
       if (f.t >= FLOAT_TIME) f.active = false;
       active = true;
     }
+    for (const p of this.particles) {
+      if (!p.active) continue;
+      p.t += dt;
+      if (p.t >= p.life) {
+        p.active = false;
+        continue;
+      }
+      p.vy += p.gravity * dt;
+      p.x += p.vx * dt;
+      p.y = Math.min(p.floor, p.y + p.vy * dt);
+      active = true;
+    }
     for (let i = this.shaking.length - 1; i >= 0; i--) {
       const o = this.shaking[i];
       o.shake -= dt;
@@ -63,6 +101,11 @@ export class Effects {
   }
 
   draw(ctx, font, camX, camY) {
+    for (const p of this.particles) {
+      if (!p.active) continue;
+      ctx.fillStyle = p.color;
+      ctx.fillRect(Math.round(p.x - camX), Math.round(p.y - camY), p.size, p.size);
+    }
     for (const f of this.floaters) {
       if (!f.active) continue;
       const k = f.t / FLOAT_TIME;

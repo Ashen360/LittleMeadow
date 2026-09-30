@@ -106,3 +106,22 @@ Dialogue (`dialogue/Dialogue.js`): the very first chat uses the introduction (ti
 line); later first-chats-of-the-day use the friendship tier's lines (100+ points = tier 1,
 300+ = tier 2), rotating by day; further chats that day use short `again` lines. Talking once
 per day gives +10 friendship (max 1000, shown as 10 hearts). A `|` in a line starts a new page.
+
+## Feedback & audio ✅
+Particles come from a pool of 64 (the oldest are reused) and only exist for half a second.
+Sounds are synthesized (`audio/Audio.js`), so there are no audio files: hoe, water, chop,
+pick, break, harvest, plant, eat, buy, ship, select, deny, talk, sleep, door. Music is a
+music-box improvisation on a major pentatonic scale over a four-chord bass; in the evening it
+shifts down and plays fewer notes. Volumes are squared (perceptual) and 0 = off.
+
+## Settings ✅
+`core/Settings.js`, saved in `localStorage["littlemeadow.settings"]`, applying to every farm:
+| Setting | Values | Default |
+|---|---|---|
+| Music / Sound effects | Off, 10–100% | 50% / 70% |
+| Render scale | Auto (≤3x), 1x (fastest), 2x, 3x | Auto |
+| Large text | dialogue and messages at 2x | Off |
+| Hold to repeat tools | keep swinging while the button is held | On |
+| Controls | rebind move / use / interact / bag (the new key replaces the first one) | |
+| Export save file | downloads `little-meadow-day-N.json` | |
+| Import save file (title only) | validates and migrates, then Continue | |

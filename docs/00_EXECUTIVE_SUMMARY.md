@@ -23,8 +23,10 @@ double-clicking it. Saves are versioned JSON in `localStorage`.
 | Low-power rendering | add `?lowres` to the URL (1× render scale) |
 
 ## Status
-**Phase 1: Farming MVP. Done.** Till, water, plant, advance the day (N), grow and harvest.
-See [03_ROADMAP.md](03_ROADMAP.md).
+**Phases 0–5 done** (all but the real art pass, which needs an artist). The full loop
+Farm → Grow → Harvest → Sell → Buy → Farm works, with four villagers, saving, sound and
+settings. See [03_ROADMAP.md](03_ROADMAP.md) and the playtest checklist in
+[07_PLAYTEST_CHECKLIST.md](07_PLAYTEST_CHECKLIST.md).
 
 ## Minimum viable vertical slice
 One farm, one town, 3 crops, 4 tools, energy, a clock with sleeping, a shipping box, one

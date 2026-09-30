@@ -52,10 +52,11 @@ player) and `portrait.<id>` (40×40, top-left) for `marigold`, `otto`, `june`, `
    anything missing falls back to the placeholder. This loader gets added the first time
    real art exists.
 
-## Audio (Phase 5)
-OGG (with MP3 fallback only if needed), mono for SFX, ≤ 100 KB per SFX, one ambient loop
-≤ 1.5 MB. Total audio budget 3 MB. Audio must load lazily after the first user input and
-must never block play.
+## Audio
+Currently all sound is synthesized in `audio/Audio.js` (no files, nothing to license). If
+recorded audio is added later: OGG (MP3 fallback only if needed), mono SFX ≤ 100 KB each, one
+ambient loop ≤ 1.5 MB, 3 MB total, loaded lazily after the first input, never blocking play.
+Keep the `play(name)` names so gameplay code doesn't change.
 
 ## Licensing
 Only original work or CC0 assets. Record each non-original asset in `assets/CREDITS.md`

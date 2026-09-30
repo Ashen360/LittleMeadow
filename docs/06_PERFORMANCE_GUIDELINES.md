@@ -45,6 +45,8 @@ player tile · map id.
 | 2026-09-30 | cloud container, headless Chromium, 1280×720, 3× render, `dist/LittleMeadow.html` via `file://` | Farm, walking (overlay on) | 60 | 0.41 / 0.60 | 1.9 MB |
 | 2026-09-30 | same | Farm, idle (overlay off) | — (0 redraws in 2 s) | — | — |
 | 2026-09-30 | cloud container, headless Chromium, 1152×648, 3× render, dev server | Phase 1 farm with crops + HUD, walking (overlay on) | 60 | 0.60 / 1.00 | 2.5 MB |
+| 2026-10-01 | cloud container, headless Chromium, 1152×648, 3× render, `file://` build | Phase 5 town at 10:00 with villagers, walking (overlay on) | 60 | 0.48 / 0.70 | 3.2 MB |
+| 2026-10-01 | same | Town, standing still / pause menu open | — (1 redraw in 3 s / 0 in 2 s) | — | — |
 
 Phase 0 notes: the single-file build runs from `file://` with no console errors; 266 map
 entities, 90 sprites drawn per frame at the default camera. Headless Chromium uses software

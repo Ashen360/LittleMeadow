@@ -32,6 +32,7 @@ export class Input {
     this.mouse = { x: 0, y: 0, inside: false, left: false, right: false, leftPressed: false, rightPressed: false };
     this.wheel = 0;          // wheel steps this frame (+ = down)
     this.usingMouse = false; // true after the mouse moves, false after a direction key
+    this.capture = null;     // one-shot callback for the next key press (key rebinding)
     this.activity = false; // any input event this frame (used to trigger a redraw)
     this.setBindings(DEFAULT_BINDINGS);
 
@@ -61,8 +62,21 @@ export class Input {
     }
   }
 
+  // The next key press goes to fn(code) instead of any action.
+  captureNext(fn) {
+    this.capture = fn;
+  }
+
   onKey(e, down) {
     if (e.ctrlKey || e.metaKey || e.altKey) return; // leave browser shortcuts alone
+    if (down && this.capture) {
+      e.preventDefault();
+      const fn = this.capture;
+      this.capture = null;
+      this.releaseAll();
+      fn(e.code);
+      return;
+    }
     const actions = this.codeToActions.get(e.code);
     if (!actions) return;
     e.preventDefault();

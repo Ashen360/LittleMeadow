@@ -55,6 +55,7 @@ Relationship points are tracked in Phase 4 and only change dialogue lightly.
 | Next day (debug builds only, `?debug`) | N |
 | Menu / back / pause | Esc |
 | Debug overlay | F3 or \` |
+| Settings / rebinding | Esc → Settings (also on the title screen) |
 
 ## Time
 - The day starts at 6:00 AM. Every 10 real seconds, 10 in-game minutes pass, so 1 in-game hour = 1 real minute.

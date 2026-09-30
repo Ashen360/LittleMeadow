@@ -15,15 +15,23 @@ export class Hud {
     this.kit = kit;
     this.toastText = '';
     this.toastTime = 0;
+    this.changed = false;
+    this.wrappedFor = null;
+    this.wrapped = [];
   }
 
   toast(text, time = 2.2) {
     this.toastText = text;
     this.toastTime = time;
+    this.changed = true;
   }
 
-  // Returns true when something visible changed (a toast expired).
+  // Returns true when something visible changed (a toast appeared or expired).
   update(dt) {
+    if (this.changed) {
+      this.changed = false;
+      return true;
+    }
     if (this.toastTime <= 0) return false;
     this.toastTime -= dt;
     return this.toastTime <= 0;
@@ -69,12 +77,27 @@ export class Hud {
     kit.panel(ctx, cx, 28, cw, 13);
     font.draw(ctx, game.moneyLabel, mid, 31, PAL.sun, 'center');
 
-    // Toast.
+    // Toast (twice the size with the large-text setting, wrapped to fit).
     if (this.toastTime > 0) {
-      const w = font.measure(this.toastText) + 12;
-      const x = Math.floor((VIEW_W - w) / 2), y = HOTBAR_Y - 18;
-      kit.panel(ctx, x, y, w, 14);
-      font.draw(ctx, this.toastText, x + 6, y + 4, PAL.cream);
+      if (game.settings.largeText) {
+        if (this.wrappedFor !== this.toastText) {
+          this.wrappedFor = this.toastText;
+          this.wrapped = font.wrap(this.toastText, (VIEW_W - 40) / 2);
+        }
+        let tw = 0;
+        for (const l of this.wrapped) tw = Math.max(tw, font.measure(l));
+        const w = tw * 2 + 12, h = this.wrapped.length * 16 + 8;
+        const x = Math.floor((VIEW_W - w) / 2), y = HOTBAR_Y - h - 4;
+        kit.panel(ctx, x, y, w, h);
+        for (let i = 0; i < this.wrapped.length; i++) {
+          font.drawScaled(ctx, this.wrapped[i], x + 6, y + 5 + i * 16, PAL.cream, 2, null, 'left');
+        }
+      } else {
+        const w = font.measure(this.toastText) + 12;
+        const x = Math.floor((VIEW_W - w) / 2), y = HOTBAR_Y - 18;
+        kit.panel(ctx, x, y, w, 14);
+        font.draw(ctx, this.toastText, x + 6, y + 4, PAL.cream);
+      }
     }
   }
 }

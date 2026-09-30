@@ -15,6 +15,7 @@ export class ToolSystem {
   constructor(game) {
     this.game = game;
     this.cooldown = 0;
+    this.holding = false; // the use button went down in the world and is still held
     this.tx = 0;
     this.ty = 0;
   }
@@ -26,9 +27,23 @@ export class ToolSystem {
     if (game.player.action) return;
 
     const m = input.mouse;
-    if (input.wasPressed('use') || m.leftPressed) this.use();
-    else if (input.wasPressed('interact')) this.interact();
-    else if (m.rightPressed) this.secondary();
+    if (!input.isDown('use') && !m.left) this.holding = false;
+    if (input.wasPressed('use') || m.leftPressed) {
+      this.holding = true;
+      this.use();
+    } else if (input.wasPressed('interact')) {
+      this.interact();
+    } else if (m.rightPressed) {
+      this.secondary();
+    } else if (this.holding && this.cooldown <= 0 && game.settings.holdToRepeat) {
+      // Holding the button keeps swinging (tools only, so it never re-opens menus).
+      const item = game.inventory.selectedItem;
+      if (item && item.tool) this.use();
+    }
+  }
+
+  sound(name) {
+    this.game.audio.play(name);
   }
 
   // Returns true if the target tile moved.
@@ -134,6 +149,7 @@ export class ToolSystem {
     } else {
       player.energy = Math.min(player.maxEnergy, player.energy + item.energy);
       inventory.removeAt(inventory.selected);
+      this.sound('eat');
       game.effects.float(`+${item.energy} energy`, player.x, player.y - 28, PAL.leafLight);
     }
     game.dirty = true;
@@ -144,7 +160,8 @@ export class ToolSystem {
     const { player, hud } = game;
     const t = TOOLS[tool];
     if (player.energy < t.energy) {
-      hud.toast('Too tired to work. Rest until tomorrow (N).');
+      hud.toast('Too tired to work. Get some sleep.');
+      this.sound('deny');
       game.effects.float('...', player.x, player.y - 28, PAL.waterLight);
       return;
     }
@@ -170,6 +187,8 @@ export class ToolSystem {
     }
     farming.till(map, tx, ty);
     game.renderer.redrawTile(map, tx, ty);
+    game.effects.burst(tx * TILE + 8, ty * TILE + 12, PAL.dirtLight, 7);
+    this.sound('hoe');
     return true;
   }
 
@@ -182,17 +201,22 @@ export class ToolSystem {
     if (map.tileAt(tx, ty).water) {
       slot.water = cap;
       hud.toast('Filled the watering can.');
+      game.effects.burst(tx * TILE + 8, ty * TILE + 10, PAL.waterLight, 8, { up: 60 });
+      this.sound('water');
       game.effects.float('Full!', tx * TILE + TILE / 2, ty * TILE, PAL.waterLight);
       return false;
     }
     if (!farming.canWater(map, tx, ty)) return false;
     if (slot.water <= 0) {
       hud.toast('The can is empty. Refill it at the pond.');
+      this.sound('deny');
       return false;
     }
     slot.water--;
     farming.water(map, tx, ty);
     game.renderer.redrawTile(map, tx, ty);
+    game.effects.burst(tx * TILE + 8, ty * TILE + 12, PAL.waterLight, 8, { up: 30, speed: 30 });
+    this.sound('water');
     return true;
   }
 
@@ -216,9 +240,17 @@ export class ToolSystem {
       }
     }
     effects.shake(obj);
+    const chip = tool === 'axe' ? PAL.woodLight : PAL.stoneLight;
+    effects.burst(obj.px, obj.py - 4, chip, 5, { up: 55 });
+    if (obj.type === 'tree') effects.burst(obj.px, obj.py - 26, PAL.leafLight, 5, { up: 10, gravity: 60, life: 0.8 });
     obj.hits = (obj.hits || 0) + 1;
-    if (obj.hits < br.hits) return true;
+    if (obj.hits < br.hits) {
+      this.sound(tool === 'axe' ? 'chop' : 'pick');
+      return true;
+    }
 
+    this.sound('break');
+    effects.burst(obj.px, obj.py - 4, chip, 12, { up: 70, speed: 55 });
     map.removeObject(obj);
     if (br.becomes) map.addObject(br.becomes, obj.x, obj.y);
     let y = obj.py - 20;
@@ -237,6 +269,9 @@ export class ToolSystem {
     if (farming.canPlant(map, tx, ty)) {
       farming.plant(map, tx, ty, item.seed);
       inventory.removeAt(inventory.selected);
+      game.effects.burst(tx * TILE + 8, ty * TILE + 12, PAL.soilLight, 4, { up: 25 });
+      this.sound('plant');
+      game.dirty = true;
     } else if (map.inBounds(tx, ty) && !map.soil[map.index(tx, ty)]) {
       hud.toast('Till the soil with the hoe first.');
     }
@@ -252,6 +287,9 @@ export class ToolSystem {
     }
     farming.harvest(map, crop);
     inventory.add(id, 1);
+    effects.burst(crop.px, crop.py - 8, PAL.sun, 6, { up: 60 });
+    effects.burst(crop.px, crop.py - 6, PAL.leafLight, 4, { up: 40 });
+    this.sound('harvest');
     effects.float(`+1 ${ITEMS[id].name}`, crop.px, crop.py - 22, PAL.sun);
     game.dirty = true;
   }

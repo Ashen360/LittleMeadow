@@ -69,11 +69,19 @@ ship turnips and wood, sleep, get paid, reload with the money kept.
 **Deliverable:** the town feels alive. Verified by simulating a whole day: all 23 schedule legs
 arrive at their targets, none needed the unreachable-target fallback.
 
-## Phase 5: Polish
-Tool/harvest particles (pooled, capped) · map fade transitions · sound effects plus one
-ambient track (WebAudio, lazy-loaded, fully optional) · settings (volume, render scale,
-key rebinding) · accessibility (larger UI text option, hold-to-repeat tools) · real art
-pass.
+## Phase 5: Polish ✅ (except the real art pass)
+- [x] Particles (pool of 64): tilling dust, water droplets, wood/stone chips, falling leaves,
+      harvest sparkles
+- [x] Fade transitions for warps, sleeping, title ↔ game (done in Phases 2–3)
+- [x] Sound: synthesized WebAudio effects for every action plus a generative music-box tune
+      that gets sparser and lower in the evening; created on the first input, silent if
+      WebAudio is unavailable, suspended while the tab is hidden
+- [x] Settings (title and pause menu): music and sound volume, render scale, large text,
+      hold-to-repeat tools, key rebinding, save export (and import on the title screen);
+      stored separately from the save
+- [x] Accessibility: large text (2x dialogue and messages), hold-to-repeat tools, rebinding
+- [ ] **Real art pass**: needs an artist (see 05_ASSET_GUIDELINES.md); the procedural
+      placeholders are complete and swappable by sprite name
 
 ## Later (explicitly out of MVP scope)
 Fishing, mining, cooking, animals, seasonal crops, weather, festivals, quests, deeper

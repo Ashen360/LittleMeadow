@@ -178,11 +178,11 @@ export class Font {
     this.draw(ctx, text, x, y, color, align);
   }
 
-  // Text drawn `scale` times larger, centred on x (used for titles and the large-text option).
-  drawScaled(ctx, text, x, y, color, scale, shadow = null) {
+  // Text drawn `scale` times larger (titles and the large-text option). align: 'center' | 'left'.
+  drawScaled(ctx, text, x, y, color, scale, shadow = null, align = 'center') {
     const w = this.measure(text) * scale;
     ctx.save();
-    ctx.translate(Math.round(x - w / 2), y);
+    ctx.translate(Math.round(align === 'center' ? x - w / 2 : x), y);
     ctx.scale(scale, scale);
     if (shadow) this.draw(ctx, text, 0, 1, shadow);
     this.draw(ctx, text, 0, 0, color);
