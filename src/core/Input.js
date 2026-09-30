@@ -11,6 +11,8 @@ export const DEFAULT_BINDINGS = {
   interact: ['KeyE'],
   use: ['Space'],
   menu: ['Escape'],
+  inventory: ['Tab', 'KeyI'],
+  nextDay: ['KeyN'], // temporary until sleeping exists (Phase 2)
   debug: ['F3', 'Backquote'],
   slot1: ['Digit1'], slot2: ['Digit2'], slot3: ['Digit3'],
   slot4: ['Digit4'], slot5: ['Digit5'], slot6: ['Digit6'],
@@ -26,6 +28,8 @@ export class Input {
     this.pressed = new Set();
     this.dirOrder = []; // held directions, most recent last
     this.mouse = { x: 0, y: 0, inside: false, left: false, right: false, leftPressed: false, rightPressed: false };
+    this.wheel = 0;          // wheel steps this frame (+ = down)
+    this.usingMouse = false; // true after the mouse moves, false after a direction key
     this.activity = false; // any input event this frame (used to trigger a redraw)
     this.setBindings(DEFAULT_BINDINGS);
 
@@ -37,6 +41,11 @@ export class Input {
     canvas.addEventListener('mousedown', (e) => this.onMouseButton(e, true));
     window.addEventListener('mouseup', (e) => this.onMouseButton(e, false));
     canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      if (e.deltaY !== 0) this.wheel += Math.sign(e.deltaY);
+      this.activity = true;
+    }, { passive: false });
   }
 
   setBindings(bindings) {
@@ -62,7 +71,10 @@ export class Input {
         if (this.held.has(a)) continue;
         this.held.add(a);
         this.pressed.add(a);
-        if (DIRECTIONS.includes(a)) this.dirOrder.push(a);
+        if (DIRECTIONS.includes(a)) {
+          this.dirOrder.push(a);
+          this.usingMouse = false;
+        }
       } else {
         this.held.delete(a);
         const k = this.dirOrder.indexOf(a);
@@ -76,6 +88,7 @@ export class Input {
     this.mouse.x = ((e.clientX - r.left) / r.width) * VIEW_W;
     this.mouse.y = ((e.clientY - r.top) / r.height) * VIEW_H;
     this.mouse.inside = true;
+    this.usingMouse = true;
     this.activity = true;
   }
 
@@ -123,6 +136,7 @@ export class Input {
     this.pressed.clear();
     this.mouse.leftPressed = false;
     this.mouse.rightPressed = false;
+    this.wheel = 0;
     this.activity = false;
   }
 }

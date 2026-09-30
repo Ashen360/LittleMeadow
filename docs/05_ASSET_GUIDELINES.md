@@ -17,7 +17,8 @@ look-alike characters, no copied UI layouts.
 | Tree | 34×46 | trunk base |
 | 1-tile object (rock, bush, box) | ≤ 18×20 | bottom centre |
 | Farmhouse | 82×80 | bottom centre of its 5×4 footprint |
-| Item icon (Phase 1) | 16×16 | top-left |
+| Item icon | 16×16 | centre (8, 8) |
+| Crop stage | 18×22 | plant base (9, 19) |
 | Portrait (Phase 4) | 40×40 | top-left |
 
 ## Sprite naming
@@ -25,7 +26,17 @@ look-alike characters, no copied UI layouts.
 `tile.grass0..3`, `tile.path0..1`, `tile.field0..1`, `tile.water0..1`, `tile.soil`, `tile.soilwet`,
 `edge.grass.{n,s,e,w}`, `edge.water.{n,s,e,w}`, `decor.flowers0..2`,
 `obj.tree`, `obj.pine`, `obj.rock`, `obj.branch`, `obj.bush`, `obj.house`, `obj.mailbox`,
-`obj.shippingbox`, `obj.sign`, `player.{down,left,right,up}.{0,1,2}`, `shadow.small`.
+`obj.shippingbox`, `obj.sign`, `obj.stump`, `player.{down,left,right,up}.{0,1,2}`, `shadow.small`.
+
+Phase 1 additions:
+- Item icons, 16×16, anchored at their centre (8, 8): `item.hoe`, `item.can`, `item.axe`,
+  `item.pickaxe`, `item.seeds.{turnip,potato,strawberry}`, `item.turnip`, `item.potato`,
+  `item.strawberry`, `item.wood`, `item.stone`.
+- Held tools (drawn in the player's hand while swinging), same size and anchor:
+  `held.{hoe,can,axe,pickaxe}` (pointing right) and `held.<tool>.left`.
+- Crops, 18×22, anchored at (9, 19) so the plant's base sits 2 px above the tile bottom:
+  `crop.turnip.0..3`, `crop.potato.0..4`, `crop.strawberry.0..4` (stage 0 = seeds, last = ripe).
+- UI: `ui.slot`, `ui.slot.selected` (20×20, top-left), `ui.cursor` (16×16 tile brackets).
 
 ## Replacing placeholder art
 1. Draw sprites into one PNG sheet (≤ 1024×1024, power of two not required).

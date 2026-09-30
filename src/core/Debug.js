@@ -32,7 +32,7 @@ export class Debug {
     this.lines = [
       `FPS ${fps.toFixed(0)}  redraws/s ${(this.renders / this.time).toFixed(0)}`,
       `CPU ${(this.cpuSum / this.frames).toFixed(2)} ms  max ${this.cpuMax.toFixed(2)} ms`,
-      `entities ${game.map.objects.length + game.entities.length}  sprites ${game.renderer.spritesDrawn}`,
+      `entities ${game.map.objects.length + game.map.crops.length + game.entities.length}  sprites ${game.renderer.spritesDrawn}`,
       `scale ${game.renderer.scale}x render / ${game.renderer.displayScale}x screen`,
       `heap ${mem}`,
       `${game.map.id} tile ${p.tileX},${p.tileY}  px ${p.x.toFixed(1)},${p.y.toFixed(1)}`,

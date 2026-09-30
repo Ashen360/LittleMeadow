@@ -16,33 +16,48 @@ list for multi-tile objects. Loading validates rectangular rows and unknown char
 Object types declare `w, h, footprint, solid, sprite`. The draw anchor is the bottom
 centre of the object's w×h area; the sort key is that area's bottom edge.
 
-## Farming 🔜 (Phase 1)
+## Farming ✅
 Per-tile soil state on tillable ground: `untilled → tilled → tilled+watered`, `crop?`.
 Crop definitions (`data/crops.js`): `{ id, seedItem, harvestItem, days, stages, regrow?, sellPrice }`.
 A crop gains one day of growth per night **only if watered that day**. Stage =
 `floor(growth / days × (stages−1))`; mature at `growth ≥ days`. Regrowing crops reset
-growth to `days − regrow`. Watered flags clear every morning. Untilled soil that stays
-empty for 3 nights reverts (no crop).
+growth to `days − regrow`. Watered flags clear every morning. Tilled soil that stays
+empty for 3 nights reverts to plain field.
+Only the field (`tillable` ground) can be tilled, and only where no object stands. Crops don't
+block movement. Harvest a mature crop with E, or with left click / Space whatever is selected.
+Code: `farming/Farming.js` (rules) and `GameMap` (`soil`, `watered`, `fallow`, `cropAt`, `crops`).
 
-## Tools 🔜
+## Tools ✅
 | Tool | Energy | Range | Cooldown | Effect |
 |---|---|---|---|---|
 | Hoe | 2 | facing tile | 0.35 s | till tillable ground |
 | Watering can | 1 | facing tile | 0.35 s | water tilled soil; refill at the pond (capacity 20) |
-| Axe | 3 | facing tile | 0.45 s | branch: 1 hit → wood; tree: 5 hits → stump + 4 wood |
+| Axe | 3 | facing tile | 0.45 s | branch: 1 hit → wood; tree: 5 hits → stump + 4 wood; stump: 2 hits → wood |
 | Pickaxe | 3 | facing tile | 0.45 s | rock: 2 hits → stone |
 
-Target tile = the tile the player faces. With the mouse, the target is the hovered tile
-if it's within 1 tile of the player.
+Target tile = the tile the player faces. Once the mouse moves, the target is the hovered tile
+if it's within 1 tile of the player (otherwise the facing tile); pressing a direction key
+switches back to facing. A bracket cursor marks the target. Using a tool turns the player
+toward the target and locks movement for the swing.
+Energy is only spent when the swing does something (tilling, watering, a hit). Filling the
+can is free. Pines, bushes and buildings can't be chopped; they show a hint instead.
+Breakable objects are data: `breakable: { tool, hits, drops, becomes }` in `data/objects.js`.
+Drops go straight into the bag (a floating "+1 Wood" confirms it). If the bag is full, the
+hit doesn't land and a message says so.
 
-## Energy 🔜
-Max 100. Tool use costs the amounts above; walking is free. At 0, tools are disabled
-(you get a sweat-drop and a message). Sleeping restores to full. Eating a crop (right click)
-restores 10–20.
+## Energy ✅
+Max 100. Tool use costs the amounts above; walking is free. When energy is below a tool's
+cost, the tool doesn't swing and a message suggests resting. The next day (N for now,
+sleeping in Phase 2) restores it to full. Eating a crop (right click) restores 10–16
+(`energy` on the item).
 
-## Inventory 🔜
-24 slots (the hotbar is slots 1–9); stack size 99; tools don't stack. No drag-and-drop in the
-MVP: click a slot to select it, and E/click in the inventory to swap two slots.
+## Inventory ✅
+24 slots (the hotbar is slots 1–9); stack size 99; tools don't stack. Tool state (the can's
+water) lives on its slot. Select a hotbar slot with 1–9, the mouse wheel or a click.
+The bag (Tab or I; Esc also closes) shows every slot: click or press E/Space on a slot to pick
+its item up, then on another slot to swap them. WASD moves the cursor.
+Starting items: hoe, watering can, axe, pickaxe, 12 turnip seeds. With `?debug`, also 6 potato
+and 4 strawberry seeds, so every crop can be tested before the shop exists.
 
 ## Time 🔜 (Phase 2)
 10 in-game minutes per 10 real seconds. The day starts at 6:00 and the clock stops at 2:00.

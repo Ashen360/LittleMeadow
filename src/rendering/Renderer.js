@@ -3,6 +3,7 @@
 import { TILE, VIEW_W, VIEW_H, MAX_RENDER_SCALE } from '../config.js';
 import { TILE_TYPES } from '../data/tiles.js';
 import { PAL } from './palette.js';
+import { Effects } from './Effects.js';
 
 const SIDES = [
   // side name, dx, dy
@@ -105,10 +106,13 @@ export class Renderer {
         a.draw(g, t.path[h % 2], x, y);
         this.drawEdges(map, tx, ty, x, y, (n) => n.grassy, t.grassEdge);
         break;
-      case 'field':
-        a.draw(g, t.field[h % 2], x, y);
+      case 'field': {
+        const i = ty * map.w + tx;
+        if (map.soil[i]) a.draw(g, map.watered[i] ? t.soilWet : t.soil, x, y);
+        else a.draw(g, t.field[h % 2], x, y);
         this.drawEdges(map, tx, ty, x, y, (n) => n.grassy, t.grassEdge);
         break;
+      }
       case 'water':
         a.draw(g, t.water[h % 2], x, y);
         this.drawEdges(map, tx, ty, x, y, (n) => !n.water && n.key !== 'void', t.waterEdge);
@@ -145,6 +149,7 @@ export class Renderer {
     const sx = Math.max(0, Math.floor(camX)), sy = Math.max(0, Math.floor(camY));
     const sw = Math.min(VIEW_W + 1, map.pxW - sx), sh = Math.min(VIEW_H + 1, map.pxH - sy);
     ctx.drawImage(map.groundCanvas, sx, sy, sw, sh, sx - camX, sy - camY, sw, sh);
+    game.drawGroundOverlay(ctx, camX, camY);
 
     // Sprites: collect visible, sort by feet, draw.
     const list = this.drawList;
@@ -156,17 +161,21 @@ export class Renderer {
       if (!o.sprite) o.sprite = atlas.get(o.def.sprite);
       list.push(o);
     }
+    for (const c of map.crops) {
+      if (c.px < left || c.px > right || c.py < top || c.py > bottom) continue;
+      list.push(c);
+    }
     for (const e of game.entities) list.push(e);
     list.sort(bySortY);
 
     for (const item of list) {
       if (item.draw) item.draw(ctx, atlas, camX, camY, this.snap);
-      else atlas.draw(ctx, item.sprite, item.px - camX, item.py - camY);
+      else atlas.draw(ctx, item.sprite, item.px - camX + Effects.shakeOffset(item), item.py - camY);
     }
     this.spritesDrawn = list.length;
 
     // UI in logical pixel space.
     ctx.setTransform(S, 0, 0, S, 0, 0);
-    game.drawUI(ctx);
+    game.drawUI(ctx, camX, camY);
   }
 }

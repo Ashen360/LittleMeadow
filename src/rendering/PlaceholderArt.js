@@ -453,6 +453,269 @@ function smallShadow() {
   return p.canvas;
 }
 
+function stump() {
+  const p = new Pen(18, 14);
+  p.ellipse(PAL.shadow, 9, 12, 7, 2);
+  p.rect(PAL.bark, 3, 6, 12, 6);
+  p.rect(PAL.barkDark, 11, 6, 4, 6);
+  p.rect(PAL.bark, 2, 10, 2, 2);
+  p.rect(PAL.barkDark, 14, 10, 2, 2);
+  p.ellipse(PAL.woodLight, 9, 6, 6, 2.5);
+  p.ellipse(PAL.wood, 9, 6, 3, 1.3);
+  p.rect(PAL.woodLight, 9, 6);
+  p.outline();
+  return p.canvas;
+}
+
+// ---------------------------------------------------------------- item icons (16x16)
+
+function iconPen(draw) {
+  const p = new Pen(16, 16);
+  draw(p);
+  p.outline();
+  return p;
+}
+
+function hoeIcon(p) {
+  p.line(PAL.bark, 3, 12, 10, 5, 2);
+  p.line(PAL.woodLight, 3, 12, 10, 5);
+  p.rect(PAL.stone, 9, 2, 5, 2);
+  p.rect(PAL.stoneLight, 9, 2, 5, 1);
+  p.rect(PAL.stoneDark, 12, 4, 2, 3);
+}
+
+function axeIcon(p) {
+  p.line(PAL.bark, 3, 12, 10, 4, 2);
+  p.line(PAL.woodLight, 3, 12, 10, 4);
+  p.rect(PAL.stone, 5, 2, 5, 5);
+  p.rect(PAL.stoneLight, 4, 3, 1, 3);
+  p.rect(PAL.stoneLight, 5, 2, 5, 1);
+  p.rect(PAL.stoneDark, 9, 3, 1, 4);
+}
+
+function pickaxeIcon(p) {
+  p.line(PAL.bark, 4, 12, 8, 4, 2);
+  p.line(PAL.woodLight, 4, 12, 8, 4);
+  p.rect(PAL.stone, 4, 2, 8, 2);
+  p.rect(PAL.stoneLight, 4, 2, 8, 1);
+  p.rect(PAL.stone, 2, 4, 2, 2);
+  p.rect(PAL.stone, 12, 4, 2, 2);
+  p.rect(PAL.stoneDark, 2, 5, 1, 1);
+  p.rect(PAL.stoneDark, 13, 5, 1, 1);
+}
+
+function canIcon(p) {
+  p.rect(PAL.shirtDark, 4, 4, 5, 1);
+  p.rect(PAL.shirtDark, 4, 5, 1, 2);
+  p.rect(PAL.shirtDark, 8, 5, 1, 2);
+  p.rect(PAL.shirt, 3, 7, 8, 6);
+  p.rect(PAL.shirtDark, 9, 7, 2, 6);
+  p.rect(PAL.shirtDark, 3, 12, 8, 1);
+  p.rect(PAL.waterLight, 4, 8, 1, 3);
+  p.line(PAL.shirt, 11, 11, 13, 6);
+  p.rect(PAL.shirtDark, 12, 4, 3, 2);
+}
+
+function seedsIcon(color) {
+  return (p) => {
+    p.rect(PAL.pathLight, 3, 2, 10, 12);
+    p.rect(PAL.cream, 3, 2, 10, 1);
+    p.rect(PAL.pathDark, 3, 4, 10, 1);
+    p.rect(PAL.pathDark, 12, 2, 1, 12);
+    p.ellipse(color, 8, 9.5, 3, 2.6);
+    p.rect(PAL.leaf, 7, 5, 2, 2);
+    p.rect(PAL.leafLight, 7, 5);
+  };
+}
+
+function turnipIcon(p) {
+  p.rect(PAL.leaf, 6, 1, 2, 5);
+  p.rect(PAL.leafLight, 8, 2, 2, 4);
+  p.rect(PAL.leafDark, 5, 3, 1, 2);
+  p.shade((x, y) => {
+    const dx = (x + 0.5 - 8) / 4.5, dy = (y + 0.5 - 9.5) / 4;
+    if (dx * dx + dy * dy > 1) return null;
+    if (y <= 8) return x <= 5 ? PAL.rose : PAL.berry;
+    return x >= 10 ? PAL.pathLight : PAL.cream;
+  });
+  p.rect(PAL.cream, 8, 14);
+}
+
+function potatoIcon(p) {
+  p.shade((x, y) => {
+    const dx = (x + 0.5 - 8) / 6, dy = (y + 0.5 - 9) / 4.5;
+    if (dx * dx + dy * dy > 1) return null;
+    const t = -dx * 0.6 - dy * 0.8;
+    return t > 0.4 ? PAL.dirtLight : t > -0.3 ? PAL.dirt : PAL.soilLight;
+  });
+  p.rect(PAL.soil, 6, 8);
+  p.rect(PAL.soil, 10, 10);
+  p.rect(PAL.soil, 8, 11);
+}
+
+function strawberryIcon(p) {
+  const widths = [4, 5.5, 5.5, 5, 4.5, 3.5, 2.5, 1.5, 0.5];
+  p.shade((x, y) => {
+    const row = y - 6;
+    if (row < 0 || row >= widths.length) return null;
+    if (Math.abs(x + 0.5 - 8) > widths[row]) return null;
+    return x < 7 && y < 10 ? PAL.rose : PAL.berry;
+  });
+  for (const [x, y] of [[6, 8], [9, 9], [7, 11], [10, 11], [8, 13]]) p.rect(PAL.sun, x, y);
+  p.rect(PAL.leaf, 5, 5, 6, 1);
+  p.rect(PAL.leafLight, 7, 4, 2, 1);
+  p.rect(PAL.leafDark, 8, 3);
+}
+
+function woodIcon(p) {
+  p.rect(PAL.bark, 2, 6, 11, 6);
+  p.rect(PAL.wood, 2, 7, 10, 1);
+  p.rect(PAL.barkDark, 2, 10, 11, 2);
+  p.ellipse(PAL.woodLight, 12.5, 9, 2.5, 3.2);
+  p.rect(PAL.wood, 12, 8, 1, 2);
+}
+
+function stoneIcon(p) {
+  p.shade((x, y) => {
+    const dx = (x + 0.5 - 8) / 5.5, dy = (y + 0.5 - 9.5) / 4.2;
+    if (dx * dx + dy * dy > 1) return null;
+    const t = -dx * 0.6 - dy * 0.8;
+    return t > 0.45 ? PAL.stoneLight : t > -0.35 ? PAL.stone : PAL.stoneDark;
+  });
+  p.rect(PAL.stoneDark, 7, 8);
+  p.rect(PAL.stoneDark, 8, 9);
+}
+
+// ---------------------------------------------------------------- crops
+
+// Crop sprites are 18x22; the plant stands on row CROP_BASE.
+const CROP_W = 18, CROP_H = 22, CROP_BASE = 17, CROP_CX = 9;
+
+function leafTuft(p, r, seed, dark = false) {
+  const cy = CROP_BASE - r;
+  const blobs = [[CROP_CX, cy, r], [CROP_CX - r * 0.75, cy + r * 0.45, r * 0.6], [CROP_CX + r * 0.75, cy + r * 0.45, r * 0.6]];
+  const light = dark ? PAL.leaf : PAL.leafLight, mid = dark ? PAL.leafDark : PAL.leaf, deep = dark ? PAL.leafDeep : PAL.leafDark;
+  p.shade((x, y) => {
+    if (y > CROP_BASE) return null;
+    let inside = false;
+    for (const [bx, by, br] of blobs) {
+      if ((x + 0.5 - bx) ** 2 + (y + 0.5 - by) ** 2 <= br * br) { inside = true; break; }
+    }
+    if (!inside) return null;
+    const t = (-(x - CROP_CX) * 0.5 - (y - cy) * 0.9) / r + (hash2(x, y, seed) - 0.5) * 0.4;
+    return t > 0.45 ? light : t > -0.3 ? mid : deep;
+  });
+}
+
+function seedDots(p) {
+  p.rect(PAL.straw, 6, CROP_BASE - 1);
+  p.rect(PAL.straw, 9, CROP_BASE - 2);
+  p.rect(PAL.straw, 12, CROP_BASE - 1);
+}
+
+function sprout(p) {
+  p.rect(PAL.leaf, 9, CROP_BASE - 3, 1, 4);
+  p.rect(PAL.leafLight, 7, CROP_BASE - 4, 2, 1);
+  p.rect(PAL.leafLight, 10, CROP_BASE - 5, 2, 1);
+  p.rect(PAL.leaf, 8, CROP_BASE - 3);
+}
+
+function dots(p, color, center, spots) {
+  for (const [x, y] of spots) {
+    p.rect(color, x, y);
+    if (center) p.rect(center, x, y + 1);
+  }
+}
+
+const CROP_STAGES = {
+  turnip: [
+    seedDots,
+    sprout,
+    (p) => leafTuft(p, 3.5, 11),
+    (p) => {
+      leafTuft(p, 4.5, 12);
+      p.shade((x, y) => {
+        const dx = (x + 0.5 - CROP_CX) / 3.5, dy = (y + 0.5 - (CROP_BASE - 0.5)) / 2.5;
+        if (dx * dx + dy * dy > 1 || y > CROP_BASE) return null;
+        return y < CROP_BASE - 1 ? PAL.berry : PAL.cream;
+      });
+    },
+  ],
+  potato: [
+    seedDots,
+    sprout,
+    (p) => leafTuft(p, 3.5, 21),
+    (p) => leafTuft(p, 5, 22),
+    (p) => {
+      leafTuft(p, 5.5, 23);
+      dots(p, PAL.white, null, [[6, 9], [11, 8], [9, 12], [13, 12]]);
+    },
+  ],
+  strawberry: [
+    seedDots,
+    sprout,
+    (p) => leafTuft(p, 4, 31, true),
+    (p) => {
+      leafTuft(p, 5, 32, true);
+      dots(p, PAL.white, null, [[6, 10], [11, 9], [9, 13]]);
+    },
+    (p) => {
+      leafTuft(p, 5, 33, true);
+      for (const [x, y] of [[5, 12], [11, 11], [8, 14], [12, 15]]) {
+        p.rect(PAL.berry, x, y, 2, 2);
+        p.rect(PAL.rose, x, y);
+      }
+    },
+  ],
+};
+
+function cropSprite(id, stage) {
+  const p = new Pen(CROP_W, CROP_H);
+  CROP_STAGES[id][stage](p);
+  p.outline();
+  return p.canvas;
+}
+
+// ---------------------------------------------------------------- UI
+
+function slotSprite(selected) {
+  const p = new Pen(20, 20);
+  if (selected) {
+    p.rect(PAL.ink, 0, 0, 20, 20);
+    p.rect(PAL.sun, 1, 1, 18, 18);
+    p.rect(PAL.cream, 3, 3, 14, 14);
+    p.rect(PAL.pathLight, 3, 3, 14, 1);
+    p.rect(PAL.pathLight, 3, 3, 1, 14);
+  } else {
+    p.rect(PAL.barkDark, 0, 0, 20, 20);
+    p.rect(PAL.pathLight, 1, 1, 18, 18);
+    p.rect(PAL.pathDark, 1, 1, 18, 1);
+    p.rect(PAL.pathDark, 1, 1, 1, 18);
+  }
+  return p.canvas;
+}
+
+// Corner brackets around the targeted tile.
+function tileCursor() {
+  const p = new Pen(16, 16);
+  const corner = (x, y, dx, dy) => {
+    p.rect(PAL.ink, x + dx, y + dy, 1, 1);
+    for (let i = 0; i < 4; i++) {
+      p.rect(PAL.cream, x + dx * i, y, 1, 1);
+      p.rect(PAL.cream, x, y + dy * i, 1, 1);
+    }
+    for (let i = 1; i < 3; i++) {
+      p.rect(PAL.ink, x + dx * (i + 1), y + dy, 1, 1);
+      p.rect(PAL.ink, x + dx, y + dy * (i + 1), 1, 1);
+    }
+  };
+  corner(0, 0, 1, 1);
+  corner(15, 0, -1, 1);
+  corner(0, 15, 1, -1);
+  corner(15, 15, -1, -1);
+  return p.canvas;
+}
+
 // ---------------------------------------------------------------- player
 
 // frame: 0 = idle / passing, 1 and 2 = opposite contact poses of the walk cycle.
@@ -565,7 +828,35 @@ export function buildPlaceholderArt(atlas) {
   atlas.add('obj.mailbox', mailbox(), 7, 22);
   atlas.add('obj.shippingbox', shippingBox(), 10, 17);
   atlas.add('obj.sign', sign(), 8, 19);
+  atlas.add('obj.stump', stump(), 9, 14);
   atlas.add('shadow.small', smallShadow(), 6, 2);
+
+  // Item icons are anchored at their centre. Tools also get held sprites (right / left).
+  const tools = { hoe: hoeIcon, can: canIcon, axe: axeIcon, pickaxe: pickaxeIcon };
+  for (const [key, draw] of Object.entries(tools)) {
+    const pen = iconPen(draw);
+    atlas.add(`item.${key}`, pen.canvas, 8, 8);
+    atlas.add(`held.${key}`, pen.canvas, 8, 8);
+    atlas.add(`held.${key}.left`, pen.flipX().canvas, 8, 8);
+  }
+  const seedColors = { turnip: PAL.rose, potato: PAL.dirt, strawberry: PAL.berry };
+  for (const [crop, color] of Object.entries(seedColors)) {
+    atlas.add(`item.seeds.${crop}`, iconPen(seedsIcon(color)).canvas, 8, 8);
+  }
+  atlas.add('item.turnip', iconPen(turnipIcon).canvas, 8, 8);
+  atlas.add('item.potato', iconPen(potatoIcon).canvas, 8, 8);
+  atlas.add('item.strawberry', iconPen(strawberryIcon).canvas, 8, 8);
+  atlas.add('item.wood', iconPen(woodIcon).canvas, 8, 8);
+  atlas.add('item.stone', iconPen(stoneIcon).canvas, 8, 8);
+
+  // Crops: anchored so the plant's base sits 2 px above the tile's bottom edge.
+  for (const [id, stages] of Object.entries(CROP_STAGES)) {
+    for (let i = 0; i < stages.length; i++) atlas.add(`crop.${id}.${i}`, cropSprite(id, i), CROP_CX, CROP_BASE + 2);
+  }
+
+  atlas.add('ui.slot', slotSprite(false));
+  atlas.add('ui.slot.selected', slotSprite(true));
+  atlas.add('ui.cursor', tileCursor());
 
   for (const dir of ['down', 'up', 'left']) {
     for (let f = 0; f < 3; f++) {

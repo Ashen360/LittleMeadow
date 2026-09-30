@@ -15,12 +15,19 @@ Every phase ends playable. We stop and verify before moving on.
 
 **Deliverable:** walk around the farm smoothly.
 
-## Phase 1: Farming MVP
-Soil state layer (tilled / watered) · tools (hoe, can, axe, pickaxe) with animation, energy
-cost, range, cooldown · debris removal with item drops · crops from `data/crops.js` ·
-inventory (24 slots, stacks) · hotbar (1–9, wheel) · energy bar · a temporary "advance
-day" debug key.
-**Deliverable:** Plant → Water → (debug) next day → Grow → Harvest.
+## Phase 1: Farming MVP ✅
+- [x] Soil state layer (tilled / watered / fallow nights) on the map, drawn into the baked ground
+- [x] Tools: hoe, watering can (capacity 20, refill at the pond), axe, pickaxe, with a swing
+      animation, energy cost, facing/mouse targeting and cooldown
+- [x] Debris removal (branch, rock, tree → stump → gone) with drops into the bag
+- [x] Crops from `data/crops.js` (turnip, potato, strawberry with regrowth), staged sprites
+- [x] Inventory (24 slots, stacks of 99) and a bag screen (Tab / I) with pick-up-and-swap
+- [x] Hotbar (1–9, mouse wheel, click), energy bar, day label, message toast, floating text
+- [x] Eating crops (right click) restores energy
+- [x] Temporary "next day" key: **N**
+
+**Deliverable:** Plant → Water → (N) next day → Grow → Harvest. Verified end to end in the
+single-file build (turnip: 4 watered nights → harvest; strawberry regrows 3 days later).
 
 ## Phase 2: Time + Save
 Clock HUD (time/day/season) · sleeping at the farmhouse door · day rollover (crop growth,

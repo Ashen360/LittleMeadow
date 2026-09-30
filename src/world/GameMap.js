@@ -1,4 +1,5 @@
-// A map: ground tile layer, world objects, and the collision grid derived from both.
+// A map: ground tile layer, world objects, the collision grid derived from both, and the
+// farming layers (soil state and crops; the rules live in farming/Farming.js).
 
 import { TILE } from '../config.js';
 import { TILE_TYPES, TILE_ID } from '../data/tiles.js';
@@ -21,6 +22,13 @@ export class GameMap {
     this.solid = new Uint8Array(n);
     this.objectAt = new Array(n).fill(null);
     this.objects = [];
+
+    // Farming layers, per tile.
+    this.soil = new Uint8Array(n);     // 1 = tilled
+    this.watered = new Uint8Array(n);  // 1 = watered today
+    this.fallow = new Uint8Array(n);   // nights this tilled tile has stood empty
+    this.cropAt = new Array(n).fill(null);
+    this.crops = [];
 
     // Set by the renderer when the ground is baked.
     this.groundCanvas = null;
@@ -53,6 +61,10 @@ export class GameMap {
 
   inBounds(tx, ty) {
     return tx >= 0 && ty >= 0 && tx < this.w && ty < this.h;
+  }
+
+  index(tx, ty) {
+    return ty * this.w + tx;
   }
 
   tileAt(tx, ty) {

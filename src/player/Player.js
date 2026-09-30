@@ -1,6 +1,8 @@
-// The player: movement with tile collision (plus corner sliding) and the walk animation.
+// The player: movement with tile collision (plus corner sliding), the walk animation, energy,
+// and the tool swing (movement is locked while a swing plays).
 
 import { TILE } from '../config.js';
+import { PLAYER, TOOLS } from '../data/tuning.js';
 
 export const DIRS = ['down', 'left', 'right', 'up'];
 const DIR_INDEX = { down: 0, left: 1, right: 2, up: 3 };
@@ -11,6 +13,16 @@ const FEET_H = 6;
 const NUDGE = 6;           // max px of corner sliding
 const STEP_TIME = 0.14;    // seconds per walk frame
 const WALK_CYCLE = [1, 0, 2, 0];
+const STRIKE_AT = 0.4;     // fraction of the swing spent raising the tool
+
+// Held-tool position (centre of the 16x16 icon) relative to the feet, per facing
+// (down, left, right, up): [raiseX, raiseY, strikeX, strikeY].
+const TOOL_POSE = [
+  [5, -21, 3, -5],
+  [3, -21, -9, -9],
+  [-3, -21, 9, -9],
+  [-5, -21, 2, -24],
+];
 
 export class Player {
   constructor(atlas) {
@@ -22,6 +34,25 @@ export class Player {
     this.animTime = 0;
     this.sprites = DIRS.map((d) => [0, 1, 2].map((f) => atlas.get(`player.${d}.${f}`)));
     this.shadow = atlas.get('shadow.small');
+    this.maxEnergy = PLAYER.maxEnergy;
+    this.energy = PLAYER.maxEnergy;
+    // Tool sprites facing right and left, resolved once.
+    this.toolSprites = {};
+    for (const t of Object.keys(TOOLS)) {
+      this.toolSprites[t] = [atlas.get(`held.${t}`), atlas.get(`held.${t}.left`)];
+    }
+    this.action = null; // { tool, time, duration } while a swing plays
+  }
+
+  startAction(tool, duration) {
+    this.action = { tool, time: 0, duration };
+    this.stand();
+  }
+
+  stand() {
+    this.moving = false;
+    this.animTime = 0;
+    this.frame = 0;
   }
 
   get sortY() {
@@ -44,6 +75,11 @@ export class Player {
 
   // Returns true if anything visible changed.
   update(dt, input, map) {
+    if (this.action) {
+      this.action.time += dt;
+      if (this.action.time >= this.action.duration) this.action = null;
+      return true;
+    }
     const px = this.x, py = this.y, pf = this.facing, pfr = this.frame;
 
     const face = input.lastDirection();
@@ -106,6 +142,17 @@ export class Player {
   draw(ctx, atlas, camX, camY, snap) {
     const x = snap(this.x) - camX, y = snap(this.y) - camY;
     atlas.draw(ctx, this.shadow, x, y);
+    const behind = this.action && this.facing === 3; // facing away: the tool is behind the body
+    if (behind) this.drawTool(ctx, atlas, x, y);
     atlas.draw(ctx, this.sprites[this.facing][this.frame], x, y);
+    if (this.action && !behind) this.drawTool(ctx, atlas, x, y);
+  }
+
+  drawTool(ctx, atlas, x, y) {
+    const a = this.action;
+    const pose = TOOL_POSE[this.facing];
+    const k = a.time / a.duration < STRIKE_AT ? 0 : 2;
+    const sprite = this.toolSprites[a.tool][this.facing === 1 ? 1 : 0];
+    atlas.draw(ctx, sprite, x + pose[k], y + pose[k + 1]);
   }
 }

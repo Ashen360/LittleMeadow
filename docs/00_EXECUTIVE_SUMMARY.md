@@ -23,7 +23,8 @@ double-clicking it. Saves are versioned JSON in `localStorage`.
 | Low-power rendering | add `?lowres` to the URL (1× render scale) |
 
 ## Status
-**Phase 0: Foundation. Done.** See [03_ROADMAP.md](03_ROADMAP.md).
+**Phase 1: Farming MVP. Done.** Till, water, plant, advance the day (N), grow and harvest.
+See [03_ROADMAP.md](03_ROADMAP.md).
 
 ## Minimum viable vertical slice
 One farm, one town, 3 crops, 4 tools, energy, a clock with sleeping, a shipping box, one
@@ -42,3 +43,5 @@ survives a page refresh.
 | UI text | Original 5 px bitmap font drawn on the canvas | Consistent pixel look, zero DOM/layout cost |
 | Watering can | Has a capacity and is refilled at the pond | Gives the pond a purpose at almost no cost |
 | Day end | The clock stops at 2:00 AM (no passing out) | Gentle; the brief asked us not to force passing out |
+| Debris drops | Cleared debris goes straight into the bag with a "+1 Wood" pop, no pickups on the ground | Same feel, no item-entity system to build |
+| Energy | Only spent when a swing does something | Missing a tile shouldn't cost you; fits "cozy over complex" |

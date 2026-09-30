@@ -14,25 +14,34 @@ src/
   core/
     Game.js             owns every system; per-frame tick; map switching
     GameLoop.js         requestAnimationFrame driver, dt clamping
-    Input.js            keyboard/mouse → named actions (rebindable)
+    Input.js            keyboard/mouse/wheel → named actions (rebindable)
     Debug.js            FPS / frame-time / memory overlay
   world/
     GameMap.js          tile layers, objects, collision queries
   player/
-    Player.js           movement, collision resolution, animation
+    Player.js           movement, collision resolution, animation, energy, tool swing
+    Inventory.js        slots, stacking, swapping
+  farming/
+    Farming.js          soil and crop rules: till, water, plant, grow overnight, harvest
+    Tools.js            ToolSystem: targeting and what using an item on the world does
+  ui/
+    UiKit.js            shared panels, slots and item icons
+    Hud.js              hotbar, energy bar, day label, message toast
+    InventoryMenu.js    the bag screen
   rendering/
     Renderer.js         canvas scaling, ground baking, y-sorted sprites, UI pass
     Camera.js           follow + clamp to map bounds
     Atlas.js            named sprite regions in one texture
+    Effects.js          pooled floating text and object shakes
     PlaceholderArt.js   procedural placeholder sprites (replaceable)
     Font.js             original 5 px bitmap font
     palette.js          the colour palette
   data/                 content only: no logic
-    tiles.js  objects.js  maps/*.js   (later: crops.js items.js npcs.js …)
+    tiles.js  objects.js  items.js  crops.js  tuning.js  maps/*.js   (later: npcs.js …)
 tools/  serve.mjs  build.mjs
 docs/
 ```
-Planned additions per phase: `farming/`, `economy/`, `npc/`, `dialogue/`, `ui/`,
+Planned additions per phase: `economy/`, `npc/`, `dialogue/`,
 `core/Time.js`, `core/SaveManager.js`, `audio/Audio.js`. Each gets created when its phase
 starts, not before.
 
@@ -40,8 +49,11 @@ starts, not before.
 ```
 rAF → GameLoop (dt clamped to 0.25 s)
     → Game.tick(dt)
-        input actions (once per frame)
-        simulation in sub-steps of ≤ 1/30 s (no tunnelling)
+        input actions (once per frame): debug, bag toggle
+        bag open → InventoryMenu.update, the world pauses
+        otherwise → hotbar, next-day key, player sub-steps of ≤ 1/30 s (no tunnelling),
+                    ToolSystem.update (target, use / interact / eat)
+        effects + HUD timers (keep redrawing only while something animates)
         camera.follow
         if anything changed → Renderer.render()
         input.endFrame()
@@ -61,15 +73,24 @@ The debug overlay forces continuous rendering while it is open.
 3. **Ground.** When a map loads, the whole ground layer is baked into one offscreen
    canvas, including edge overlays (grass lips on paths, pond banks). Each frame draws it
    with a single `drawImage`. Changing a tile redraws only that tile and its 4 neighbours.
-4. **Sprites.** Visible objects and entities are collected into a reused array, sorted by
-   `sortY` (feet / footprint bottom), and drawn from the atlas.
-5. **UI.** Drawn last, in logical pixel coordinates, with the bitmap font.
+4. **Ground overlay.** The target-tile cursor, drawn over the ground and under sprites.
+5. **Sprites.** Visible objects, crops and entities are collected into a reused array, sorted
+   by `sortY` (feet / footprint bottom), and drawn from the atlas. Shaking objects get a
+   ±1 px offset.
+6. **UI.** Drawn last, in logical pixel coordinates, with the bitmap font: floating text,
+   HUD, then the bag screen and debug overlay.
 
 ## Data model
 - **Tiles:** `Uint8Array` of tile-type ids per map plus a derived `solid` `Uint8Array`.
   Tile types are defined in `data/tiles.js`.
 - **Objects:** plain records `{type, def, x, y}` whose footprint is registered in
   `objectAt[]`. Types are defined in `data/objects.js` (sprite, footprint, solidity).
+- **Farming:** per-tile `soil`, `watered` and `fallow` `Uint8Array`s plus `cropAt[]` and a
+  `crops` list on each map. Crop records hold `{ id, x, y, growth }`; the stage and sprite are
+  derived from them. Tilled/watered soil is drawn into the baked ground, so a change
+  redraws just that tile.
+- **Items:** `data/items.js` (name, icon, tool / seed / energy). Inventory slots are
+  `{ id, qty }` (+ `water` on the can). Balance numbers live in `data/tuning.js`.
 - **Maps:** ASCII rows plus a legend plus an explicit object list (`data/maps/*.js`).
   Easy to edit by hand; validated when loaded, with clear errors.
 
