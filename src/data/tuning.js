@@ -12,6 +12,32 @@ export const TOOLS = {
   pickaxe: { energy: 3, cooldown: 0.45 },
 };
 
+// Tool upgrades at the Bramblewick Forge. Level 0 is the starting tool (matches TOOLS above);
+// each level's stats are listed per tool. power = hits dealt per swing (a tree takes 5, a rock 2).
+// Energy may be fractional; the energy bar shows it smoothly.
+export const UPGRADES = {
+  order: ['pickaxe', 'axe', 'hoe'],          // rows in the forge menu
+  tiers: ['', 'Copper', 'Iron', 'Silver', 'Gold', 'Starlit'],
+  // [gold, wood] to reach level 1..5. Stone is too scarce on the farm to ask for.
+  cost: [[100, 5], [250, 10], [500, 20], [900, 30], [1500, 40]],
+  stats: {
+    pickaxe: {
+      energy: [3, 2.5, 2, 1.5, 1, 0.5],
+      cooldown: [0.45, 0.41, 0.37, 0.33, 0.29, 0.25],
+      power: [1, 2, 2, 2, 2, 2],
+    },
+    axe: {
+      energy: [3, 2.5, 2, 1.5, 1, 0.5],
+      cooldown: [0.45, 0.41, 0.37, 0.33, 0.29, 0.25],
+      power: [1, 2, 2, 3, 4, 5],
+    },
+    hoe: {
+      energy: [2, 1.6, 1.3, 1, 0.7, 0.4],
+      cooldown: [0.35, 0.32, 0.29, 0.26, 0.23, 0.2],
+    },
+  },
+};
+
 // Minutes are counted from midnight of the current day; 26:00 = 2:00 the next morning.
 export const TIME = {
   dayStart: 6 * 60,
@@ -25,7 +51,7 @@ export const TIME = {
 
 export const ECONOMY = {
   startMoney: 200,
-  shopOpen: 9 * 60,
+  shopOpen: 9 * 60,       // Fenn's Provisions and the forge share these hours
   shopClose: 17 * 60,
   // What Fenn's Provisions sells, in display order.
   shopStock: ['turnipSeeds', 'potatoSeeds', 'strawberrySeeds'],

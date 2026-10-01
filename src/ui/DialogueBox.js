@@ -1,10 +1,13 @@
 // The dialogue box: portrait, name, friendship hearts and typewriter text in pages of three
 // lines. E / Space / Enter / click finishes the page, then advances; Esc closes.
+// Text is laid out with natural line and page breaks (see dialogue/Layout.js), and the
+// typewriter pauses briefly after punctuation.
 
 import { VIEW_W, VIEW_H } from '../config.js';
 import { PAL } from '../rendering/palette.js';
 import { LINE_H } from '../rendering/Font.js';
 import { FRIENDSHIP } from '../data/tuning.js';
+import { layoutPages } from '../dialogue/Layout.js';
 import { confirmPressed } from './MenuBox.js';
 
 const BOX_W = VIEW_W - 16;
@@ -15,6 +18,8 @@ const TEXT_X = BOX_X + 54;
 const TEXT_W = BOX_W - 62;
 const LINES_PER_PAGE = 3;
 const CHARS_PER_SECOND = 55;
+const PAUSE_SENTENCE = 0.22; // seconds the typewriter rests after . ! ?
+const PAUSE_CLAUSE = 0.1;    // after , ; :
 
 export class DialogueBox {
   constructor(kit, atlas) {
@@ -25,6 +30,8 @@ export class DialogueBox {
     this.page = 0;
     this.shown = 0;       // characters of the current page revealed so far
     this.pageLength = 0;
+    this.pageText = '';   // the current page's lines joined, for punctuation lookups
+    this.pause = 0;
     this.portrait = null;
   }
 
@@ -33,29 +40,49 @@ export class DialogueBox {
     this.npc = npc;
     this.large = large;
     this.portrait = this.atlas.get(`portrait.${npc.id}`);
-    this.pages = [];
-    const font = this.kit.font;
-    for (const para of text.split('|')) {
-      const per = large ? 2 : LINES_PER_PAGE;
-      const lines = font.wrap(para, large ? TEXT_W / 2 : TEXT_W);
-      for (let i = 0; i < lines.length; i += per) this.pages.push(lines.slice(i, i + per));
-    }
+    this.pages = layoutPages(this.kit.font, text, large ? TEXT_W / 2 : TEXT_W, large ? 2 : LINES_PER_PAGE);
     this.setPage(0);
   }
 
   setPage(k) {
     this.page = k;
     this.shown = 0;
-    this.pageLength = this.pages[k].reduce((n, l) => n + l.length, 0);
+    this.pause = 0;
+    // Lines are drawn without the space between them, so the page text has none either.
+    this.pageText = this.pages[k].join('');
+    this.pageLength = this.pageText.length;
   }
 
   get typing() {
     return this.shown < this.pageLength;
   }
 
+  // Reveals characters, resting briefly after punctuation that ends a sentence or clause.
+  type(dt) {
+    if (this.pause > 0) {
+      this.pause -= dt;
+      return;
+    }
+    const from = Math.floor(this.shown);
+    const to = Math.min(this.pageLength, this.shown + dt * CHARS_PER_SECOND);
+    for (let k = from; k < Math.floor(to); k++) {
+      const ch = this.pageText[k];
+      const next = this.pageText[k + 1];
+      // Only pause at the end of a mark run ("..." or "?!" pause once) and not at the page's end.
+      if (k + 1 >= this.pageLength || '.!?,;:'.includes(next)) continue;
+      const pause = '.!?'.includes(ch) ? PAUSE_SENTENCE : ',;:'.includes(ch) ? PAUSE_CLAUSE : 0;
+      if (pause) {
+        this.shown = k + 1;
+        this.pause = pause;
+        return;
+      }
+    }
+    this.shown = to;
+  }
+
   update(input, game) {
     if (this.typing) {
-      this.shown = Math.min(this.pageLength, this.shown + game.frameDt * CHARS_PER_SECOND);
+      this.type(game.frameDt);
       game.dirty = true;
     }
     if (input.wasPressed('menu')) {

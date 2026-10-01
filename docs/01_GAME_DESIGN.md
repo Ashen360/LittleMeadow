@@ -65,4 +65,9 @@ Relationship points are tracked in Phase 4 and only change dialogue lightly.
 
 ## Out of scope for the MVP
 Fishing, mining, cooking, animals, weather, festivals, quests, romance, crafting,
-furniture, tool upgrades and extra maps. See the roadmap's "Later" list.
+and extra maps. See the roadmap's "Later" list. (Tool upgrades were added after the first
+playtest; a house interior with furniture is planned as Phase 6.)
+
+## Long-term goals
+- **Tool upgrades** at the Bramblewick Forge: five tiers per tool, paid in gold and wood.
+- **Home** (Phase 6): furnish the farmhouse from a furniture shop.

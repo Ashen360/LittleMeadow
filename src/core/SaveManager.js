@@ -2,14 +2,24 @@
 // a backup, and loading falls back to the backup if the main save is unreadable.
 // Old saves are upgraded by chained migrations: MIGRATIONS[n] turns a version-n save into n+1.
 
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
 
 const KEY = 'littlemeadow.save';
 const BACKUP_KEY = 'littlemeadow.save.bak';
 const TEMP_KEY = 'littlemeadow.save.tmp';
 
 const MIGRATIONS = {
-  // 1: (data) => { /* change the data */ data.version = 2; return data; },
+  // v2 adds the Bramblewick Forge at (24, 5). Saves list every map object, so older towns get
+  // it here; whatever stood on its lot (a tree, or its stump) is cleared.
+  1: (data) => {
+    const town = data.maps && data.maps.town;
+    if (town && Array.isArray(town.objects)) {
+      town.objects = town.objects.filter(([, x, y]) => !(x >= 24 && x <= 26 && y >= 5 && y <= 7));
+      town.objects.push(['forge', 24, 5]);
+    }
+    data.version = 2;
+    return data;
+  },
 };
 
 function storage() {

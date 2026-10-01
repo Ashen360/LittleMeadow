@@ -4,12 +4,24 @@
 
 import { TILE } from '../config.js';
 import { ITEMS } from '../data/items.js';
-import { TOOLS } from '../data/tuning.js';
+import { TOOLS, UPGRADES } from '../data/tuning.js';
 import { PAL } from '../rendering/palette.js';
 
 // Tile offsets per facing index (down, left, right, up).
 const FACING_DX = [0, -1, 1, 0];
 const FACING_DY = [1, 0, 0, -1];
+
+// A tool's stats at an upgrade level: { energy, cooldown, power }.
+export function toolStats(tool, level = 0) {
+  const base = TOOLS[tool];
+  const up = UPGRADES.stats[tool];
+  if (!up) return { energy: base.energy, cooldown: base.cooldown, power: 1 };
+  return {
+    energy: up.energy ? up.energy[level] : base.energy,
+    cooldown: up.cooldown ? up.cooldown[level] : base.cooldown,
+    power: up.power ? up.power[level] : 1,
+  };
+}
 
 export class ToolSystem {
   constructor(game) {
@@ -158,7 +170,7 @@ export class ToolSystem {
   swing(tool, slot) {
     const { game } = this;
     const { player, hud } = game;
-    const t = TOOLS[tool];
+    const t = toolStats(tool, slot.level || 0);
     if (player.energy < t.energy) {
       hud.toast('Too tired to work. Get some sleep.');
       this.sound('deny');
@@ -170,7 +182,7 @@ export class ToolSystem {
     let worked = false;
     if (tool === 'hoe') worked = this.hoe();
     else if (tool === 'can') worked = this.waterTile(slot);
-    else worked = this.hit(tool);
+    else worked = this.hit(tool, t.power);
     // Energy is only spent when the swing actually did something.
     if (worked) player.energy = Math.max(0, player.energy - t.energy);
   }
@@ -202,7 +214,7 @@ export class ToolSystem {
       slot.water = cap;
       hud.toast('Filled the watering can.');
       game.effects.burst(tx * TILE + 8, ty * TILE + 10, PAL.waterLight, 8, { up: 60 });
-      this.sound('water');
+      this.sound('fill');
       game.effects.float('Full!', tx * TILE + TILE / 2, ty * TILE, PAL.waterLight);
       return false;
     }
@@ -220,8 +232,8 @@ export class ToolSystem {
     return true;
   }
 
-  // Axe / pickaxe on the target tile's object.
-  hit(tool) {
+  // Axe / pickaxe on the target tile's object. power = hits dealt (upgraded tools hit harder).
+  hit(tool, power) {
     const { game } = this;
     const { map, inventory, hud, effects } = game;
     const { tx, ty } = this;
@@ -243,7 +255,7 @@ export class ToolSystem {
     const chip = tool === 'axe' ? PAL.woodLight : PAL.stoneLight;
     effects.burst(obj.px, obj.py - 4, chip, 5, { up: 55 });
     if (obj.type === 'tree') effects.burst(obj.px, obj.py - 26, PAL.leafLight, 5, { up: 10, gravity: 60, life: 0.8 });
-    obj.hits = (obj.hits || 0) + 1;
+    obj.hits = (obj.hits || 0) + power;
     if (obj.hits < br.hits) {
       this.sound(tool === 'axe' ? 'chop' : 'pick');
       return true;

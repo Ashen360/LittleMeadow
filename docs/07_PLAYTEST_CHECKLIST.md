@@ -65,6 +65,7 @@ Tick as you go; note anything odd next to the item.
 ### Farming (field = the brown area east of the house)
 - [ ] 1 = hoe: Space or left click tills the tile in front of you (or the hovered tile next to you)
 - [ ] 2 = watering can: water tilled soil; the gauge in the slot goes down; refill at the pond
+      (watering should sound soft and bubbly, not slappy)
 - [ ] 5 = turnip seeds: plant on tilled soil
 - [ ] Axe on branches and round trees, pickaxe on rocks: shake, chips, "+1 Wood"/"+1 Stone"
 - [ ] Holding Space keeps swinging (turn off in Settings → Hold to repeat tools)
@@ -84,12 +85,19 @@ Tick as you go; note anything odd next to the item.
 - [ ] Store door (E) between 9 and 5 opens the shop; Shift+E buys five; closed outside hours
 - [ ] Hold turnips, press E on the shipping box (next to the house); empty hands takes them back
 - [ ] After sleeping, a summary shows what sold; money in the top-right goes up
+- [ ] The forge (next to the store, E at the anvil, 9 to 5) lists pickaxe, axe and hoe with
+      tier bars; Buy asks to confirm, takes gold + wood, and the bar fills
+- [ ] An upgraded axe fells a tree in fewer chops and uses less energy; the tool's name shows
+      its tier and its slot shows a coloured gem
+- [ ] An old save (from before the forge) still loads, and the forge is there
 
 ### Villagers
 - [ ] June visits your mailbox around 7–8 AM; Pip visits your pond after lunch
 - [ ] Marigold stands outside the store in the day; Otto tends the flowerbeds
 - [ ] Talking (E) shows a portrait, name, hearts and text; the first chat ever is an introduction
 - [ ] Talking again the same day gives a short line; new lines on later days
+- [ ] Dialogue lines break at natural points (sentence ends), with no single word left
+      alone on a line; also try it with Large text on
 - [ ] Everyone goes home in the evening
 
 ### Saving

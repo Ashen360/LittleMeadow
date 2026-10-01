@@ -12,7 +12,7 @@ import { Fade } from '../rendering/Fade.js';
 import { PAL } from '../rendering/palette.js';
 import { GameMap } from '../world/GameMap.js';
 import { Player } from '../player/Player.js';
-import { Inventory } from '../player/Inventory.js';
+import { Inventory, slotName } from '../player/Inventory.js';
 import { Farming } from '../farming/Farming.js';
 import { ToolSystem } from '../farming/Tools.js';
 import { UiKit } from '../ui/UiKit.js';
@@ -20,6 +20,7 @@ import { Hud } from '../ui/Hud.js';
 import { InventoryMenu } from '../ui/InventoryMenu.js';
 import { MenuBox } from '../ui/MenuBox.js';
 import { ShopMenu } from '../ui/ShopMenu.js';
+import { ForgeMenu } from '../ui/ForgeMenu.js';
 import { DialogueBox } from '../ui/DialogueBox.js';
 import { SettingsMenu } from '../ui/SettingsMenu.js';
 import { KeybindMenu } from '../ui/KeybindMenu.js';
@@ -66,6 +67,7 @@ export class Game {
     this.hud = new Hud(this.ui);
     this.bag = new InventoryMenu(this.ui);
     this.shop = new ShopMenu(this.ui);
+    this.forge = new ForgeMenu(this.ui);
     this.dialogue = new DialogueBox(this.ui, this.atlas);
     this.modals = [];
     this.cursorSprite = this.atlas.get('ui.cursor');
@@ -378,6 +380,15 @@ export class Game {
         this.openModal(this.shop);
         this.audio.play('door');
       }
+    } else if (action === 'forge') {
+      const m = this.clock.minutes;
+      if (m < ECONOMY.shopOpen || m >= ECONOMY.shopClose) {
+        this.hud.toast('The forge fire is banked for the night. Open 9 am to 5 pm.', 3);
+      } else {
+        this.forge.reset();
+        this.openModal(this.forge);
+        this.audio.play('door');
+      }
     } else if (action === 'ship') {
       this.shipSelected();
     }
@@ -567,7 +578,7 @@ export class Game {
     if (sel !== inv.selected) {
       inv.selected = sel;
       const s = inv.slots[sel];
-      this.hud.toast(s ? ITEMS[s.id].name : 'Empty hands', 1.2);
+      this.hud.toast(s ? slotName(s) : 'Empty hands', 1.2);
       this.audio.play('select');
       this.dirty = true;
     }

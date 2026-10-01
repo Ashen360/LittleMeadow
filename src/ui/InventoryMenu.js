@@ -6,6 +6,7 @@ import { VIEW_W, VIEW_H } from '../config.js';
 import { PAL } from '../rendering/palette.js';
 import { ITEMS } from '../data/items.js';
 import { INVENTORY } from '../data/tuning.js';
+import { slotName } from '../player/Inventory.js';
 import { SLOT } from './UiKit.js';
 
 const COLS = INVENTORY.hotbar;
@@ -110,7 +111,7 @@ export class InventoryMenu {
       this.infoLines = id ? font.wrap(ITEMS[id].desc, PANEL_W - PAD * 2) : [];
     }
     if (id) {
-      font.draw(ctx, ITEMS[id].name, PANEL_X + PAD, INFO_Y, PAL.sun);
+      font.draw(ctx, slotName(shown), PANEL_X + PAD, INFO_Y, PAL.sun);
       for (let i = 0; i < this.infoLines.length && i < 2; i++) {
         font.draw(ctx, this.infoLines[i], PANEL_X + PAD, INFO_Y + 10 + i * 9, PAL.cream);
       }

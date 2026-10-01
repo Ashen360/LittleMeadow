@@ -45,8 +45,29 @@ Breakable objects are data: `breakable: { tool, hits, drops, becomes }` in `data
 Drops go straight into the bag (a floating "+1 Wood" confirms it). If the bag is full, the
 hit doesn't land and a message says so.
 
+### Tool upgrades ✅
+The **Bramblewick Forge** (next to Fenn's, open 9:00–17:00, E at the anvil) upgrades the
+pickaxe, axe and hoe through five tiers: Copper, Iron, Silver, Gold, Starlit. Each row in the
+forge shows the tool, what the next tier improves, its cost, one bar per tier and a Buy button;
+buying always asks to confirm. The upgrade is instant. Costs are gold + wood (stone is too
+scarce to ask for):
+
+| Level | 1 | 2 | 3 | 4 | 5 |
+|---|---|---|---|---|---|
+| Cost | 100g + 5 wood | 250g + 10 | 500g + 20 | 900g + 30 | 1500g + 40 |
+| Pickaxe / axe energy | 2.5 | 2 | 1.5 | 1 | 0.5 |
+| Pickaxe / axe swing | 0.41 s | 0.37 s | 0.33 s | 0.29 s | 0.25 s |
+| Axe: chops per tree (5 hp) | 3 | 3 | 2 | 2 | 1 |
+| Pickaxe: hits per rock (2 hp) | 1 | 1 | 1 | 1 | 1 |
+| Hoe energy / swing | 1.6 / 0.32 s | 1.3 / 0.29 s | 1 / 0.26 s | 0.7 / 0.23 s | 0.4 / 0.2 s |
+
+The level is stored on the tool's inventory slot (`slot.level`), so it saves with the bag.
+Upgraded tools show their tier in their name ("Copper Axe") and a tier-coloured gem on
+their slot. Tuning: `UPGRADES` in `data/tuning.js`.
+
 ## Energy ✅
-Max 100. Tool use costs the amounts above; walking is free. When energy is below a tool's
+Max 100. Tool use costs the amounts above (less with upgraded tools, and possibly
+fractional); walking is free. When energy is below a tool's
 cost, the tool doesn't swing and a message suggests resting. The next day (N for now,
 sleeping in Phase 2) restores it to full. Eating a crop (right click) restores 10–16
 (`energy` on the item).

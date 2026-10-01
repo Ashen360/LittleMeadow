@@ -79,7 +79,8 @@ export class Audio {
     o.stop(t + dur + 0.02);
   }
 
-  noise(dur, { vol = 0.3, freq = 1000, type = 'lowpass', delay = 0, q = 1 } = {}) {
+  // attack > 0 fades the noise in instead of starting at full volume (softer, less "slappy").
+  noise(dur, { vol = 0.3, freq = 1000, type = 'lowpass', delay = 0, q = 1, attack = 0 } = {}) {
     const c = this.ctx;
     const t = c.currentTime + delay;
     const src = c.createBufferSource();
@@ -89,7 +90,12 @@ export class Audio {
     f.frequency.value = freq;
     f.Q.value = q;
     const g = c.createGain();
-    g.gain.setValueAtTime(vol, t);
+    if (attack > 0) {
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol, t + attack);
+    } else {
+      g.gain.setValueAtTime(vol, t);
+    }
     g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     src.connect(f);
     f.connect(g);
@@ -128,7 +134,30 @@ export class Audio {
 
 const SFX = {
   hoe: (a) => { a.noise(0.14, { vol: 0.5, freq: 700 }); a.tone(110, 0.1, { slide: -50, vol: 0.2 }); },
-  water: (a) => { a.noise(0.3, { vol: 0.2, freq: 2600, type: 'bandpass', q: 0.8 }); },
+  // A soft pour that fades in, with a few droplets: sine "bloops" sliding upward like bubbles.
+  water: (a) => {
+    a.noise(0.42, { vol: 0.07, freq: 900, q: 0.5, attack: 0.08 });
+    for (let i = 0; i < 3; i++) {
+      const f = 520 + Math.random() * 380;
+      a.tone(f, 0.07, { slide: f * 0.7, vol: 0.06, attack: 0.012, delay: 0.05 + i * 0.08 + Math.random() * 0.03 });
+    }
+  },
+  // Refilling at the pond: lower, rounder glugs.
+  fill: (a) => {
+    a.noise(0.5, { vol: 0.06, freq: 500, q: 0.5, attack: 0.1 });
+    for (let i = 0; i < 4; i++) {
+      const f = 260 + Math.random() * 120 + i * 40;
+      a.tone(f, 0.1, { slide: f * 0.9, vol: 0.08, attack: 0.015, delay: i * 0.1 });
+    }
+  },
+  // The forge: a bright anvil ring.
+  upgrade: (a) => {
+    a.noise(0.05, { vol: 0.15, freq: 3000, type: 'highpass' });
+    a.tone(1047, 0.7, { type: 'triangle', vol: 0.16 });
+    a.tone(1568, 0.5, { vol: 0.07, delay: 0.01 });
+    a.tone(2093, 0.3, { vol: 0.04, delay: 0.02 });
+    a.tone(1319, 0.6, { type: 'triangle', vol: 0.1, delay: 0.25 });
+  },
   chop: (a) => { a.tone(190, 0.09, { type: 'triangle', vol: 0.35, slide: -60 }); a.noise(0.06, { vol: 0.25, freq: 1400, type: 'bandpass' }); },
   pick: (a) => { a.tone(1250, 0.07, { type: 'square', vol: 0.08 }); a.tone(1870, 0.12, { vol: 0.12, delay: 0.02 }); },
   break: (a) => { a.noise(0.22, { vol: 0.45, freq: 600 }); a.tone(130, 0.18, { slide: -70, vol: 0.2 }); },

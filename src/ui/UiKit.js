@@ -6,6 +6,9 @@ import { TOOLS } from '../data/tuning.js';
 
 export const SLOT = 20;
 
+// Tool tier colours for levels 1..5: copper, iron, silver, gold, starlit.
+export const TIER_GEMS = [PAL.woodLight, PAL.stoneLight, PAL.white, PAL.sun, PAL.waterLight];
+
 // Cached number strings, so stack counts don't allocate while drawing.
 const NUM = Array.from({ length: 100 }, (_, i) => String(i));
 
@@ -41,6 +44,13 @@ export class UiKit {
     this.icon(ctx, slot.id, x + SLOT / 2, y + SLOT / 2 - (hasBar ? 2 : 0));
     if (slot.qty > 1) {
       this.font.drawShadowed(ctx, NUM[Math.min(slot.qty, 99)], x + SLOT - 2, y + SLOT - 8, PAL.white, PAL.ink, 'right');
+    }
+    if (slot.level) {
+      // Upgraded tool: a small gem in its tier's colour in the top-left corner.
+      ctx.fillStyle = PAL.ink;
+      ctx.fillRect(x + 2, y + 2, 5, 5);
+      ctx.fillStyle = TIER_GEMS[slot.level - 1];
+      ctx.fillRect(x + 3, y + 3, 3, 3);
     }
     if (hasBar) {
       // Water gauge along the bottom of the slot.

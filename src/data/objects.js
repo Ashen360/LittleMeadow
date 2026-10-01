@@ -52,6 +52,11 @@ export const OBJECT_TYPES = {
     sprite: 'obj.cottage.sky', w: 4, h: 4, solid: true, footprint: [0, 1, 4, 3],
     examine: 'June\'s cottage. A bicycle leans by the door.',
   },
+  // The top row is roof overhang; the anvil counter is at the front centre.
+  forge: {
+    sprite: 'obj.forge', w: 3, h: 3, solid: true, footprint: [0, 1, 3, 2],
+    examine: 'Bramblewick Forge. The anvil is still warm.', use: { dx: 1, dy: 2, action: 'forge' },
+  },
   fountain: { sprite: 'obj.fountain', w: 3, h: 2, solid: true, examine: 'Coins glint at the bottom of the fountain.' },
   bench: { sprite: 'obj.bench', w: 2, h: 1, solid: true, examine: 'A well-loved bench.' },
   lamp: { sprite: 'obj.lamp', w: 1, h: 1, solid: true },

@@ -597,6 +597,68 @@ function store() {
   return p.canvas;
 }
 
+// The Bramblewick Forge: an open-fronted smithy, 3 tiles wide.
+function forge() {
+  const p = new Pen(50, 58);
+  const R = (c, x, y, w = 1, h = 1) => p.rect(c, x + 1, y + 1, w, h);
+  // Chimney with a warm glow at the top.
+  R(PAL.stone, 34, 2, 7, 14);
+  R(PAL.stoneDark, 39, 2, 2, 14);
+  R(PAL.stoneDark, 33, 0, 9, 3);
+  R(PAL.peach, 35, 1, 5, 1);
+  // Slate roof.
+  for (let y = 8; y <= 27; y++) {
+    const t = (y - 8) / 19;
+    const xl = Math.round(8 - 8 * t), xr = Math.round(39 + 8 * t);
+    for (let x = xl; x <= xr; x++) {
+      let c = PAL.stone;
+      if (y <= 9) c = PAL.stoneLight;
+      else if ((y - 8) % 4 === 3) c = PAL.stoneDark;
+      else if ((x + Math.floor((y - 8) / 4) * 3) % 6 === 0) c = PAL.stoneDark;
+      R(c, x, y);
+    }
+  }
+  R(PAL.plumDark, 0, 26, 48, 2);
+  // Hanging sign with an anvil emblem.
+  R(PAL.barkDark, 15, 14, 18, 9);
+  R(PAL.woodLight, 16, 15, 16, 7);
+  R(PAL.stoneDark, 19, 17, 10, 2);
+  R(PAL.stoneDark, 22, 19, 4, 2);
+  R(PAL.stoneDark, 20, 21, 8, 1);
+  // Timber frame around a dark, open workshop.
+  R(PAL.plumDark, 4, 28, 40, 24);
+  R(PAL.wood, 1, 28, 46, 3);
+  R(PAL.woodLight, 1, 28, 46, 1);
+  R(PAL.wood, 1, 28, 4, 24);
+  R(PAL.wood, 43, 28, 4, 24);
+  R(PAL.bark, 46, 28, 1, 24);
+  // Hearth: a stone arch with a fire.
+  R(PAL.stone, 7, 33, 17, 15);
+  R(PAL.stoneLight, 7, 33, 17, 1);
+  R(PAL.ink, 10, 38, 11, 10);
+  R(PAL.roofDark, 11, 39, 9, 9);
+  R(PAL.rose, 11, 43, 9, 5);
+  R(PAL.sun, 13, 44, 5, 4);
+  R(PAL.cream, 15, 46, 2, 2);
+  // Tools on the back wall.
+  R(PAL.bark, 33, 32, 1, 8);
+  R(PAL.stone, 31, 32, 5, 2);
+  R(PAL.bark, 38, 32, 1, 8);
+  R(PAL.stoneLight, 37, 39, 3, 1);
+  // Anvil counter at the front.
+  R(PAL.stoneDark, 27, 43, 13, 3);
+  R(PAL.stoneLight, 28, 43, 11, 1);
+  R(PAL.stoneDark, 25, 44, 2, 1);
+  R(PAL.stoneDark, 30, 46, 7, 3);
+  R(PAL.stoneDark, 28, 49, 11, 3);
+  // Stone floor.
+  R(PAL.stone, 0, 52, 48, 4);
+  R(PAL.stoneLight, 0, 52, 48, 1);
+  R(PAL.stoneDark, 0, 55, 48, 1);
+  p.outline();
+  return p.canvas;
+}
+
 function fountain() {
   const p = new Pen(50, 44);
   const cx = 25;
@@ -1148,6 +1210,7 @@ export function buildPlaceholderArt(atlas) {
   atlas.add('obj.cottage.rose', cottage(PAL.roof, PAL.roofDark, PAL.roofLight, PAL.woodLight, PAL.wood), 33, 68);
   atlas.add('obj.cottage.moss', cottage(PAL.leafDark, PAL.leafDeep, PAL.leaf, PAL.cream, PAL.pathLight), 33, 68);
   atlas.add('obj.cottage.sky', cottage(PAL.water, PAL.waterDeep, PAL.waterLight, PAL.pathLight, PAL.path), 33, 68);
+  atlas.add('obj.forge', forge(), 25, 58);
   atlas.add('obj.fountain', fountain(), 25, 41);
   atlas.add('obj.bench', bench(), 17, 20);
   atlas.add('obj.lamp', lamp(), 7, 37);

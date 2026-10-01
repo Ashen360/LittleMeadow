@@ -35,10 +35,12 @@ src/
     Path.js             BFS on the collision grid
   dialogue/
     Dialogue.js         picks the line (intro / tier / again)
+    Layout.js           natural line and page breaks for dialogue (small DP, run on open)
   ui/
     UiKit.js            shared panels, slots and item icons
     MenuBox.js          title / pause / prompts
     ShopMenu.js         the seed shop
+    ForgeMenu.js        tool upgrades (tier bars, Buy with confirmation)
     DialogueBox.js      portrait, hearts, typewriter pages
     SettingsMenu.js     settings screen
     KeybindMenu.js      key rebinding
@@ -128,7 +130,10 @@ migrations (`MIGRATIONS[n]` upgrades version n to n+1) on load; bump `SAVE_VERSI
 a migration whenever the shape changes. Autosave happens on sleep, when the tab is hidden
 and on `pagehide`, so a refresh loses nothing.
 Maps store their full object list (not a diff), so removed debris and new stumps survive,
-and unknown object/crop/item ids are skipped on load instead of crashing.
+and unknown object/crop/item ids are skipped on load instead of crashing. The flip side:
+**adding an object to a map definition needs a migration**, or older saves won't have it.
+Version history: v1 = original; v2 = adds the forge to the town (clearing its lot).
+Tool upgrade levels live on inventory slots (`slot.level`) and needed no migration.
 
 ## Bundling constraints (keep `tools/build.mjs` simple)
 - Named exports only (`export class/function/const`). No `export default`, no `export { }` lists.

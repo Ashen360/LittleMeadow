@@ -83,9 +83,24 @@ arrive at their targets, none needed the unreachable-target fallback.
 - [ ] **Real art pass**: needs an artist (see 05_ASSET_GUIDELINES.md); the procedural
       placeholders are complete and swappable by sprite name
 
+## Playtest round 1 ✅
+Feedback after the full checklist passed:
+- [x] Softer watering sound: a faded-in, low-passed pour with bubbly droplets (no sharp
+      onset); refilling at the pond has its own deeper glug
+- [x] Natural dialogue breaks: lines and pages prefer sentence and clause ends, no lone
+      orphan word on a last line, no line ending on "the"/"a"; brief typewriter pauses after
+      punctuation (`dialogue/Layout.js`)
+- [x] Tool upgrades at the new Bramblewick Forge: five tiers for the pickaxe, axe and hoe
+      (fewer hits, less energy, faster swings). Save format v2 adds the forge to existing towns.
+
+## Phase 6: Home & furniture (next)
+The long-term goal the playtest asked for: walk into the farmhouse (an interior map), start
+with a basic bed (sleep there) and a lamp, and buy furniture, floors and wallpaper from a
+furniture shop in Bramblewick. Place / move / pick up furniture; all saved.
+
 ## Later (explicitly out of MVP scope)
 Fishing, mining, cooking, animals, seasonal crops, weather, festivals, quests, deeper
-relationships/romance, farm upgrades, crafting, furniture, more maps.
+relationships/romance, farm upgrades, crafting, more maps.
 
 ---
 

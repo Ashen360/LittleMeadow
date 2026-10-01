@@ -1,11 +1,18 @@
 // Slots of { id, qty } (null = empty). The first INVENTORY.hotbar slots form the hotbar.
-// Tools don't stack; tool state (like the watering can's water) is stored on the slot.
+// Tools don't stack; tool state (the watering can's water, a tool's upgrade level) is stored
+// on the slot, so it saves with the inventory.
 
 import { ITEMS } from '../data/items.js';
-import { INVENTORY } from '../data/tuning.js';
+import { INVENTORY, UPGRADES } from '../data/tuning.js';
 
 export function maxStack(id) {
   return ITEMS[id].tool ? 1 : INVENTORY.stack;
+}
+
+// Display name including a tool's tier, e.g. "Copper Axe".
+export function slotName(slot) {
+  const name = ITEMS[slot.id].name;
+  return slot.level ? `${UPGRADES.tiers[slot.level]} ${name}` : name;
 }
 
 export class Inventory {
@@ -66,10 +73,28 @@ export class Inventory {
     if (s.qty <= 0) this.slots[index] = null;
   }
 
+  // Removes qty of `id` across stacks (last stacks first). Returns how many were missing.
+  removeId(id, qty) {
+    for (let i = this.slots.length - 1; i >= 0 && qty > 0; i--) {
+      const s = this.slots[i];
+      if (!s || s.id !== id) continue;
+      const n = Math.min(qty, s.qty);
+      this.removeAt(i, n);
+      qty -= n;
+    }
+    return qty;
+  }
+
   count(id) {
     let n = 0;
     for (const s of this.slots) if (s && s.id === id) n += s.qty;
     return n;
+  }
+
+  // The slot holding the tool with this TOOLS key (e.g. 'axe'), or null.
+  findTool(tool) {
+    for (const s of this.slots) if (s && ITEMS[s.id].tool === tool) return s;
+    return null;
   }
 
   swap(a, b) {
