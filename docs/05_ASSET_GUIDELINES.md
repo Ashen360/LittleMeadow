@@ -41,7 +41,18 @@ Phase 1 additions:
 Phase 3 additions (anchor = bottom centre of the object's area, like other objects):
 `tile.plaza0..1`, `obj.store` (6×5 area, 98×86), `obj.cottage.{rose,moss,sky}` (4×4, 66×70),
 `obj.fountain` (3×2), `obj.bench` (2×1), `obj.lamp`, `obj.flowerbed`, `obj.forge` (3×3 area,
-50×58; the anvil counter is the front-centre tile).
+50×58; the anvil counter is the front-centre tile), `obj.furnitureshop` (5×4, 82×76).
+
+Phase 6 (the farmhouse interior):
+- Floors `tile.floor.{oak,honey,rose,stone}` and wallpapers
+  `tile.wall.{cream,sprig,rosebud,sky,starry}`: 16×16 and seamless in both directions.
+- `tile.trim` (wall tops and edges), overlays `edge.crown` (top of the wall), `edge.baseboard`
+  (bottom 4 px of the wall), `edge.wallshadow` (top 3 px of the floor under a wall),
+  `decor.doormat`, `obj.window` (on the wall, 18×24, anchor 9,28), `fx.glow` (48×48, centre
+  anchor, translucent warm light).
+- Furniture `furn.<id>` for every id in `data/furniture.js`: footprint width + 2 px of outline
+  margin, anchored at the bottom centre (rugs have no margin). Each gets an item icon
+  `icon.furn.<id>`; floors and wallpapers get `icon.floor.<id>` / `icon.wall.<id>`.
 
 Phase 4 additions: `npc.<id>.{down,left,right,up}.{0,1,2}` (18×24, feet (9, 23), like the
 player) and `portrait.<id>` (40×40, top-left) for `marigold`, `otto`, `june`, `pip`.

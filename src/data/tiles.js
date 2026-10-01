@@ -9,6 +9,11 @@ export const TILE_TYPES = [
   { key: 'water', solid: true, water: true },
   { key: 'field', solid: false, tillable: true },
   { key: 'plaza', solid: false },
+  // Indoors. floor/wall art follows the map's decor (floor and wallpaper styles).
+  { key: 'floor', solid: false, indoor: true },
+  { key: 'wall', solid: true, indoor: true },     // wallpapered wall face
+  { key: 'trim', solid: true, indoor: true },     // dark wooden wall tops and edges
+  { key: 'doormat', solid: false, indoor: true }, // the way out
 ];
 
 export const TILE_ID = Object.fromEntries(TILE_TYPES.map((t, i) => [t.key, i]));

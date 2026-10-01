@@ -23,9 +23,9 @@ double-clicking it. Saves are versioned JSON in `localStorage`.
 | Low-power rendering | add `?lowres` to the URL (1× render scale) |
 
 ## Status
-**Phases 0–5 done** (all but the real art pass, which needs an artist). The full loop
+**Phases 0–6 done** (all but the real art pass, which needs an artist). The full loop
 Farm → Grow → Harvest → Sell → Buy → Farm works, with four villagers, saving, sound and
-settings. See [03_ROADMAP.md](03_ROADMAP.md) and the playtest checklist in
+settings. Long-term goals: tool upgrades at the forge, and a farmhouse to furnish (Phase 6). See [03_ROADMAP.md](03_ROADMAP.md) and the playtest checklist in
 [07_PLAYTEST_CHECKLIST.md](07_PLAYTEST_CHECKLIST.md).
 
 ## Minimum viable vertical slice
@@ -40,7 +40,7 @@ survives a page refresh.
 | 16 or 32 px tiles | 16 px tiles, 384×216 logical view (24×13.5 tiles) | Integer-scales to 1152×648 (3×) on 1366×768 laptops and 1920×1080 (5×) on Full HD |
 | 4-direction movement | 8-way movement (normalized), 4-direction sprites | Pressing two WASD keys together feels natural; facing follows the most recent key |
 | Suggested file tree | Trimmed: `Tile.js` + `Collision.js` merged into `GameMap.js`; content lives in `src/data/` | Fewer, more cohesive modules; content is data, not code |
-| House | No interior for the MVP: interact with the farmhouse door to sleep | Saves a whole map and its transitions for little gameplay value |
+| House | No interior for the MVP (the door was the bed); added in Phase 6 with furniture | Kept the MVP small; the playtest then asked for a long-term goal |
 | Saves in LocalStorage or IndexedDB | `localStorage` | A save is a few KB; IndexedDB's async API adds complexity for no gain |
 | UI text | Original 5 px bitmap font drawn on the canvas | Consistent pixel look, zero DOM/layout cost |
 | Watering can | Has a capacity and is refilled at the pond | Gives the pond a purpose at almost no cost |

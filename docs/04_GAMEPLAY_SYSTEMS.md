@@ -84,8 +84,47 @@ and 4 strawberry seeds, so every crop can be tested before the shop exists.
 10 in-game minutes per 10 real seconds. The day starts at 6:00 and the clock stops at 2:00
 ("It's very late…"); you never pass out. The clock pauses while any menu or prompt is open.
 From 18:00 to 21:00 a plum wash fades in (evening light).
-Sleeping (farmhouse door): fade out → ship sales (Phase 3) → grow crops and dry soil on every
-map → restore energy → 6:00 next day → reset NPCs (Phase 4) → wake outside the door → save.
+Sleeping (E on the bed): fade out → ship sales → grow crops and dry soil on every map →
+restore energy → 6:00 next day → reset NPCs → wake beside the bed (a free floor tile below
+or beside it; by the doormat if there is no bed) → save.
+
+## Home & furniture ✅ (Phase 6)
+**Farmhouse:** E on the farmhouse door fades inside to the spot above the doormat; stepping
+onto the doormat warps back outside. The room (`data/maps/home.js`) has trim, two rows of
+wallpapered wall with windows, and an 11×6 floor. Its `decor` holds the floor and wallpaper
+styles and is saved with the map.
+**Furniture** (`data/furniture.js`) are map objects of type `furn_<id>`, with an item of the
+same id. Holding one indoors shows a ghost at the target (green = fits, red = doesn't):
+- Keyboard: the footprint extends away from you from the facing tile. Mouse: any hovered tile
+  in the room (indoors the mouse reaches the whole room); the footprint's bottom row sits on
+  it, centred.
+- It must be all floor, not on the tile above the doormat, and not overlap you or other
+  furniture. Rugs (`flat`) are walkable and live in a separate layer (`GameMap.flatAt`), so
+  furniture can stand on them; they always draw underneath.
+- Using a tool or empty hands on furniture picks it up (standing pieces before rugs). Picking
+  up your only bed shows a reminder; you can always put it back.
+- Beds (`use: 'sleep'`) work from any of their tiles. `light` pieces (lamp, woodstove) glow
+  after 18:00, and with any light the indoor night wash is lighter (0.26 instead of 0.42).
+**Floors and wallpaper:** using one anywhere indoors re-styles the whole room (the ground is
+re-baked) and puts the previous style's item back in the bag.
+**Willow & Wool** (Bramblewick, 9:00–17:00): Furniture / Floors / Wallpaper tabs
+(Left/Right or click), a 7-row scrolling list (Up/Down, wheel, hover) and a preview of the
+selected piece on your current floor. E / click buys one. Decorations can't be shipped.
+
+| Furniture | Size | Price | | Floors / wallpaper | Price |
+|---|---|---|---|---|---|
+| Basic Bed (bed) | 1×2 | 300g | | Oak Floor | 100g |
+| Little Lamp (light) | 1×1 | 150g | | Honey Parquet | 250g |
+| Quilted Bed (bed) | 2×2 | 1200g | | Rose Tile Floor | 300g |
+| Oak Chair | 1×1 | 80g | | Mossy Stone Floor | 350g |
+| Plum Armchair | 1×1 | 260g | | Cream Wallpaper | 100g |
+| Farmhouse Table | 2×1 | 340g | | Sprig Wallpaper | 200g |
+| Bookshelf | 2×1 | 420g | | Rosebud Wallpaper | 250g |
+| Dresser | 2×1 | 320g | | Sky Stripe Wallpaper | 250g |
+| Potted Fern | 1×1 | 90g | | Starry Plum Wallpaper | 350g |
+| Little Woodstove (light) | 1×1 | 700g | | | |
+| Rose Rug (rug) | 3×2 | 280g | | | |
+| Meadow Rug (rug) | 2×2 | 220g | | | |
 Saving after the rollover means reloading lands on the fresh morning.
 
 ## Maps & warps ✅

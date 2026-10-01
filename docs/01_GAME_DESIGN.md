@@ -14,12 +14,14 @@ cheerful jingles.
 ## World (MVP)
 | Map | Size | Contents |
 |---|---|---|
-| Farm | 40×30 tiles | Farmhouse (door = sleep), 16×9 field with debris, pond, trees, rocks, mailbox, shipping box, exit east to town |
+| Farm | 40×30 tiles | Farmhouse (door = go inside), 16×9 field with debris, pond, trees, rocks, mailbox, shipping box, exit east to town |
+| Farmhouse | 13×10 tiles | Your room: a bed (sleep), a lamp, windows; furnish it from Willow & Wool |
 | Bramblewick | ~40×30 tiles | General store, town square with fountain, 3 cottages, paths, flower beds, exit west to farm |
 
 ## Core loop
-Wake at 6:00 AM → water crops → clear debris and till → plant → walk to town, chat,
-buy seeds → ship produce in the evening → sleep (save, crops grow, energy restored).
+Wake at 6:00 AM beside your bed → water crops → clear debris and till → plant → walk to
+town, chat, buy seeds → ship produce in the evening → spend savings on tool upgrades and
+furniture → sleep (save, crops grow, energy restored).
 
 ## Crops (MVP)
 | Crop | Seed price | Days to grow | Regrows | Sell price |
@@ -50,7 +52,8 @@ Relationship points are tracked in Phase 4 and only change dialogue lightly.
 | Secondary (e.g. eat) | Right click |
 | Hotbar | 1–9, mouse wheel, click a slot |
 | Bag (inventory) | Tab or I |
-| Sleep | E or right click on the farmhouse door |
+| Go home / sleep | E on the farmhouse door to go in; E on the bed to sleep; the doormat leads out |
+| Decorate (indoors) | Hold furniture and click / Space to place; click furniture to pick it up; use floor or wallpaper anywhere to apply |
 | Shop / ship | E on the store door / on the shipping box (Shift+E buys 5) |
 | Next day (debug builds only, `?debug`) | N |
 | Menu / back / pause | Esc |
@@ -66,8 +69,9 @@ Relationship points are tracked in Phase 4 and only change dialogue lightly.
 ## Out of scope for the MVP
 Fishing, mining, cooking, animals, weather, festivals, quests, romance, crafting,
 and extra maps. See the roadmap's "Later" list. (Tool upgrades were added after the first
-playtest; a house interior with furniture is planned as Phase 6.)
+playtest, and the house interior with furniture in Phase 6.)
 
 ## Long-term goals
 - **Tool upgrades** at the Bramblewick Forge: five tiers per tool, paid in gold and wood.
-- **Home** (Phase 6): furnish the farmhouse from a furniture shop.
+- **Home**: furnish the farmhouse from Willow & Wool Home Goods: 12 pieces of furniture,
+  4 floors and 5 wallpapers, from an 80g chair to a 1200g quilted bed.

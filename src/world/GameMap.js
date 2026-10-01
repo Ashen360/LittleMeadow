@@ -12,6 +12,9 @@ export class GameMap {
     this.name = def.name;
     this.spawn = def.spawn;
     this.warps = def.warps || [];
+    this.indoor = !!def.indoor;
+    this.entry = def.entry || null;                     // where you appear when coming in
+    this.decor = def.decor ? { ...def.decor } : null;   // indoor floor / wallpaper styles
     const rows = def.rows;
     this.h = rows.length;
     this.w = rows[0].length;
@@ -22,6 +25,7 @@ export class GameMap {
     this.ground = new Uint8Array(n);
     this.solid = new Uint8Array(n);
     this.objectAt = new Array(n).fill(null);
+    this.flatAt = new Array(n).fill(null); // rugs and windows: under whatever stands there
     this.objects = [];
 
     // Farming layers, per tile.
@@ -110,12 +114,14 @@ export class GameMap {
       // Bottom centre of the object's area, in world pixels: the sprite anchor and sort key.
       px: (x + def.w / 2) * TILE,
       py: (y + def.h) * TILE,
-      sortY: (y + def.h) * TILE,
+      // Flat objects sort before everything else (a rug is always under the chair on it).
+      sortY: def.flat ? (y + def.h) * TILE - 100000 : (y + def.h) * TILE,
       sprite: null, // resolved lazily by the renderer
       fx: x + fx, fy: y + fy, fw, fh,
     };
+    const layer = def.flat ? this.flatAt : this.objectAt;
     this.forFootprint(obj, (i) => {
-      this.objectAt[i] = obj;
+      layer[i] = obj;
       this.refreshSolid(i);
     });
     this.objects.push(obj);
@@ -126,26 +132,37 @@ export class GameMap {
     const k = this.objects.indexOf(obj);
     if (k < 0) return;
     this.objects.splice(k, 1);
+    const layer = obj.def.flat ? this.flatAt : this.objectAt;
     this.forFootprint(obj, (i) => {
-      if (this.objectAt[i] === obj) this.objectAt[i] = null;
+      if (layer[i] === obj) layer[i] = null;
       this.refreshSolid(i);
     });
+  }
+
+  // The object you'd interact with on a tile: a standing one first, then a flat one under it.
+  topObjectAt(tx, ty) {
+    if (!this.inBounds(tx, ty)) return null;
+    const i = ty * this.w + tx;
+    return this.objectAt[i] || this.flatAt[i];
   }
 
   // ---------------------------------------------------------------- save state
 
   // Objects, soil and crops (crops are rebuilt through Farming so sprites resolve).
   saveState() {
-    return {
+    const state = {
       objects: this.objects.map((o) => (o.hits ? [o.type, o.x, o.y, o.hits] : [o.type, o.x, o.y])),
       soil: Array.from(this.soil).join(''),
       watered: Array.from(this.watered).join(''),
       fallow: Array.from(this.fallow).join(''),
       crops: this.crops.map((c) => [c.id, c.x, c.y, c.growth]),
     };
+    if (this.decor) state.decor = { ...this.decor };
+    return state;
   }
 
   loadState(state, farming) {
+    if (this.decor && state.decor) Object.assign(this.decor, state.decor);
     for (const o of this.objects.slice()) this.removeObject(o);
     for (const [type, x, y, hits] of state.objects) {
       if (!OBJECT_TYPES[type]) continue; // an object type that no longer exists

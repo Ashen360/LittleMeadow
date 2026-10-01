@@ -122,10 +122,30 @@ export class Renderer {
         a.draw(g, t.water[h % 2], x, y);
         this.drawEdges(map, tx, ty, x, y, (n) => !n.water && n.key !== 'void', t.waterEdge);
         break;
+      // Indoors: the floor and wallpaper follow the map's decor styles.
+      case 'floor':
+      case 'doormat':
+        a.draw(g, this.styleSprite('tile.floor.', map.decor.floor, 'oak'), x, y);
+        if (map.tileAt(tx, ty - 1).key === 'wall') a.draw(g, a.get('edge.wallshadow'), x, y);
+        if (type.key === 'doormat') a.draw(g, a.get('decor.doormat'), x, y);
+        break;
+      case 'wall':
+        a.draw(g, this.styleSprite('tile.wall.', map.decor.wall, 'cream'), x, y);
+        if (map.tileAt(tx, ty - 1).key !== 'wall') a.draw(g, a.get('edge.crown'), x, y);
+        if (map.tileAt(tx, ty + 1).key === 'floor') a.draw(g, a.get('edge.baseboard'), x, y);
+        break;
+      case 'trim':
+        a.draw(g, a.get('tile.trim'), x, y);
+        break;
       default:
         g.fillStyle = PAL.bg;
         g.fillRect(x, y, TILE, TILE);
     }
+  }
+
+  // A decor style's tile sprite; falls back if a saved style no longer exists.
+  styleSprite(prefix, style, fallback) {
+    return this.atlas.has(prefix + style) ? this.atlas.get(prefix + style) : this.atlas.get(prefix + fallback);
   }
 
   drawEdges(map, tx, ty, x, y, test, sprites) {

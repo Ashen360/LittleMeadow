@@ -41,6 +41,9 @@ src/
     MenuBox.js          title / pause / prompts
     ShopMenu.js         the seed shop
     ForgeMenu.js        tool upgrades (tier bars, Buy with confirmation)
+    FurnitureMenu.js    Willow & Wool: tabs, scrolling list, preview
+  home/
+    Home.js             placing / picking up furniture, floor & wallpaper, wake spot, ghost
     DialogueBox.js      portrait, hearts, typewriter pages
     SettingsMenu.js     settings screen
     KeybindMenu.js      key rebinding
@@ -132,8 +135,11 @@ and on `pagehide`, so a refresh loses nothing.
 Maps store their full object list (not a diff), so removed debris and new stumps survive,
 and unknown object/crop/item ids are skipped on load instead of crashing. The flip side:
 **adding an object to a map definition needs a migration**, or older saves won't have it.
-Version history: v1 = original; v2 = adds the forge to the town (clearing its lot).
-Tool upgrade levels live on inventory slots (`slot.level`) and needed no migration.
+Version history: v1 = original; v2 = adds the forge to the town (clearing its lot);
+v3 = adds Willow & Wool to the town (clearing its lot and a pine). Tool upgrade levels live
+on inventory slots (`slot.level`) and needed no migration. A brand-new map (like the
+farmhouse interior, `home`) needs none either: a save without it keeps the map's defaults.
+Indoor maps also save `decor: { floor, wall }`.
 
 ## Bundling constraints (keep `tools/build.mjs` simple)
 - Named exports only (`export class/function/const`). No `export default`, no `export { }` lists.

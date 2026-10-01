@@ -730,6 +730,412 @@ function flowerbed(seed) {
   return p.canvas;
 }
 
+// ---------------------------------------------------------------- the farmhouse interior
+
+// Floor styles (16x16, seamless).
+const FLOOR_ART = {
+  oak(p) {
+    for (let band = 0; band < 4; band++) {
+      const y = band * 4;
+      p.rect(band % 2 ? PAL.woodLight : '#bb8250', 0, y, 16, 3);
+      p.rect(PAL.wood, 0, y + 3, 16, 1);
+      const jx = (band * 7 + 3) % 16;
+      p.rect(PAL.bark, jx, y, 1, 3);
+      p.rect(PAL.straw, (jx + 5) % 16, y + 1, 2, 1);
+    }
+  },
+  honey(p) {
+    for (let by = 0; by < 2; by++) {
+      for (let bx = 0; bx < 2; bx++) {
+        const x = bx * 8, y = by * 8, across = (bx + by) % 2 === 0;
+        p.rect(PAL.straw, x, y, 8, 8);
+        for (let k = 0; k < 8; k += 3) {
+          if (across) p.rect(PAL.woodLight, x, y + k, 8, 1);
+          else p.rect(PAL.woodLight, x + k, y, 1, 8);
+        }
+        p.rect(PAL.sun, x + 1, y + 1, 2, 1);
+        p.rect(PAL.wood, x, y + 7, 8, 1);
+        p.rect(PAL.wood, x + 7, y, 1, 8);
+      }
+    }
+  },
+  rose(p) {
+    p.rect(PAL.cream, 0, 0, 16, 16);
+    for (let by = 0; by < 2; by++) {
+      for (let bx = 0; bx < 2; bx++) {
+        p.rect((bx + by) % 2 ? PAL.peach : PAL.rose, bx * 8, by * 8, 7, 7);
+        p.rect(PAL.white, bx * 8 + 1, by * 8 + 1, 2, 1);
+      }
+    }
+  },
+  stone(p) {
+    p.rect(PAL.stone, 0, 0, 16, 16);
+    p.rect(PAL.stoneDark, 0, 7, 16, 1);
+    p.rect(PAL.stoneDark, 0, 15, 16, 1);
+    p.rect(PAL.stoneDark, 6, 0, 1, 7);
+    p.rect(PAL.stoneDark, 12, 8, 1, 7);
+    p.rect(PAL.stoneLight, 1, 1, 3, 1);
+    p.rect(PAL.stoneLight, 8, 9, 3, 1);
+    p.rect(PAL.leafLight, 6, 6); p.rect(PAL.leaf, 7, 7); p.rect(PAL.leafLight, 12, 14);
+    p.rect(PAL.leaf, 0, 15); p.rect(PAL.leafLight, 3, 7);
+  },
+};
+
+// Wallpaper styles (16x16, seamless).
+const WALL_ART = {
+  cream(p) {
+    p.rect(PAL.cream, 0, 0, 16, 16);
+    for (let x = 2; x < 16; x += 8) p.rect(PAL.pathLight, x, 0, 2, 16);
+  },
+  sprig(p) {
+    p.rect(PAL.cream, 0, 0, 16, 16);
+    for (const [x, y] of [[4, 3], [12, 11]]) {
+      p.rect(PAL.leafDark, x, y, 1, 3);
+      p.rect(PAL.leaf, x - 1, y); p.rect(PAL.leafLight, x + 1, y + 1); p.rect(PAL.leaf, x - 1, y + 2);
+    }
+  },
+  rosebud(p) {
+    p.rect(PAL.peach, 0, 0, 16, 16);
+    for (const [x, y] of [[3, 4], [11, 12]]) {
+      p.rect(PAL.rose, x, y, 2, 2);
+      p.rect(PAL.berry, x + 1, y + 1);
+      p.rect(PAL.leaf, x - 1, y + 2);
+      p.rect(PAL.leaf, x + 2, y + 2);
+    }
+  },
+  sky(p) {
+    p.rect(PAL.white, 0, 0, 16, 16);
+    for (let x = 0; x < 16; x += 8) p.rect(PAL.waterLight, x, 0, 4, 16);
+  },
+  starry(p) {
+    p.rect(PAL.plum, 0, 0, 16, 16);
+    p.rect(PAL.plumDark, 0, 8, 16, 1);
+    for (const [x, y, big] of [[4, 3, true], [12, 11, true], [11, 4, false], [3, 13, false]]) {
+      p.rect(PAL.sun, x, y);
+      if (big) { p.rect(PAL.straw, x - 1, y); p.rect(PAL.straw, x + 1, y); p.rect(PAL.straw, x, y - 1); p.rect(PAL.straw, x, y + 1); }
+    }
+  },
+};
+
+function tilePen(draw) {
+  const p = new Pen(16, 16);
+  draw(p);
+  return p.canvas;
+}
+
+function trimTile() {
+  const p = new Pen(16, 16);
+  p.rect(PAL.barkDark, 0, 0, 16, 16);
+  p.rect(PAL.bark, 0, 0, 16, 1);
+  for (let y = 4; y < 16; y += 5) p.rect(PAL.bark, 0, y, 16, 1);
+  return p.canvas;
+}
+
+function crownEdge() {
+  const p = new Pen(16, 16);
+  p.rect(PAL.bark, 0, 0, 16, 1);
+  p.rect(PAL.woodLight, 0, 1, 16, 1);
+  p.rect('rgba(42, 31, 45, 0.15)', 0, 2, 16, 2);
+  return p.canvas;
+}
+
+function baseboardEdge() {
+  const p = new Pen(16, 16);
+  p.rect(PAL.woodLight, 0, 12, 16, 1);
+  p.rect(PAL.wood, 0, 13, 16, 2);
+  p.rect(PAL.bark, 0, 15, 16, 1);
+  return p.canvas;
+}
+
+function wallShadowEdge() {
+  const p = new Pen(16, 16);
+  p.rect('rgba(42, 31, 45, 0.28)', 0, 0, 16, 1);
+  p.rect('rgba(42, 31, 45, 0.16)', 0, 1, 16, 1);
+  p.rect('rgba(42, 31, 45, 0.07)', 0, 2, 16, 1);
+  return p.canvas;
+}
+
+function doormat() {
+  const p = new Pen(16, 16);
+  p.rect(PAL.berry, 2, 3, 12, 11);
+  p.rect(PAL.rose, 3, 4, 10, 9);
+  for (let y = 6; y < 12; y += 3) p.rect(PAL.peach, 3, y, 10, 1);
+  for (let x = 2; x < 14; x += 2) { p.rect(PAL.cream, x, 2); p.rect(PAL.cream, x + 1, 14); }
+  return p.canvas;
+}
+
+function windowSprite() {
+  const p = new Pen(18, 24);
+  const R = (c, x, y, w = 1, h = 1) => p.rect(c, x + 1, y + 1, w, h);
+  R(PAL.cream, 0, 0, 16, 20);
+  R(PAL.waterLight, 2, 2, 12, 15);
+  R(PAL.white, 2, 2, 12, 4);
+  R(PAL.leafLight, 2, 14, 12, 3);
+  R(PAL.cream, 7, 2, 2, 15);
+  R(PAL.cream, 2, 9, 12, 1);
+  R(PAL.peach, 1, 1, 3, 17);
+  R(PAL.peach, 12, 1, 3, 17);
+  R(PAL.rose, 3, 1, 1, 17);
+  R(PAL.rose, 12, 1, 1, 17);
+  R(PAL.woodLight, 0, 19, 16, 3);
+  R(PAL.wood, 0, 21, 16, 1);
+  p.outline();
+  return p.canvas;
+}
+
+// A soft, round warm light for lamps after dark (drawn additively-ish with alpha).
+function glow() {
+  const p = new Pen(48, 48);
+  p.shade((x, y) => {
+    const d = Math.hypot(x + 0.5 - 24, y + 0.5 - 24);
+    if (d < 8) return 'rgba(246, 216, 122, 0.5)';
+    if (d < 14) return 'rgba(246, 216, 122, 0.32)';
+    if (d < 19) return 'rgba(246, 216, 122, 0.18)';
+    if (d < 23) return 'rgba(246, 216, 122, 0.08)';
+    return null;
+  });
+  return p.canvas;
+}
+
+// Furniture. Sizes include a 1 px outline margin; anchors are set at registration.
+const FURNITURE_ART = {
+  bedBasic() {
+    const p = new Pen(18, 34);
+    const R = (c, x, y, w = 1, h = 1) => p.rect(c, x + 1, y + 1, w, h);
+    R(PAL.bark, 0, 0, 16, 7); R(PAL.wood, 1, 1, 14, 5); R(PAL.woodLight, 1, 1, 14, 1);
+    R(PAL.wood, 0, 7, 1, 23); R(PAL.wood, 15, 7, 1, 23);
+    R(PAL.white, 2, 5, 12, 5); R(PAL.pathLight, 2, 9, 12, 1);
+    R(PAL.rose, 1, 11, 14, 18);
+    for (let y = 13; y < 29; y += 4) {
+      for (let x = 1; x < 15; x += 4) if (((x + y - 1) / 4) % 2 < 1) R(PAL.peach, x, y, Math.min(4, 15 - x), Math.min(4, 29 - y));
+    }
+    R(PAL.cream, 1, 10, 14, 3); R(PAL.pathLight, 1, 12, 14, 1);
+    R(PAL.bark, 0, 29, 16, 3); R(PAL.wood, 1, 29, 14, 1);
+    p.outline();
+    return p.canvas;
+  },
+  bedQuilt() {
+    const p = new Pen(34, 34);
+    const R = (c, x, y, w = 1, h = 1) => p.rect(c, x + 1, y + 1, w, h);
+    R(PAL.bark, 0, 0, 32, 8); R(PAL.wood, 1, 1, 30, 6); R(PAL.woodLight, 1, 1, 30, 1);
+    R(PAL.bark, 14, 0, 4, 2); R(PAL.sun, 15, 2, 2, 2);
+    R(PAL.wood, 0, 8, 1, 22); R(PAL.wood, 31, 8, 1, 22);
+    R(PAL.white, 2, 6, 13, 5); R(PAL.white, 17, 6, 13, 5); R(PAL.pathLight, 2, 10, 28, 1);
+    R(PAL.plum, 1, 12, 30, 17);
+    for (const [hx, hy] of [[4, 16], [14, 15], [24, 17], [8, 23], [19, 23]]) {
+      R(PAL.rose, hx, hy, 2, 1); R(PAL.rose, hx + 3, hy, 2, 1); R(PAL.rose, hx, hy + 1, 5, 1);
+      R(PAL.rose, hx + 1, hy + 2, 3, 1); R(PAL.rose, hx + 2, hy + 3);
+    }
+    R(PAL.cream, 1, 11, 30, 3); R(PAL.pathLight, 1, 13, 30, 1);
+    R(PAL.bark, 0, 29, 32, 3); R(PAL.wood, 1, 29, 30, 1);
+    p.outline();
+    return p.canvas;
+  },
+  lampBasic() {
+    const p = new Pen(14, 28);
+    const R = (c, x, y, w = 1, h = 1) => p.rect(c, x + 1, y + 1, w, h);
+    for (let y = 0; y < 9; y++) {
+      const half = 3 + Math.round(y * 3 / 8);
+      R(y === 8 ? PAL.straw : PAL.sun, 6 - half, y, half * 2, 1);
+    }
+    R(PAL.cream, 3, 1, 2, 6);
+    R(PAL.bark, 5, 9, 2, 13);
+    R(PAL.bark, 3, 21, 6, 1); R(PAL.barkDark, 2, 22, 8, 3);
+    p.outline();
+    return p.canvas;
+  },
+  chair() {
+    const p = new Pen(16, 22);
+    const R = (c, x, y, w = 1, h = 1) => p.rect(c, x + 1, y + 1, w, h);
+    R(PAL.wood, 2, 0, 10, 2); R(PAL.wood, 2, 0, 2, 11); R(PAL.wood, 10, 0, 2, 11);
+    R(PAL.woodLight, 5, 2, 1, 7); R(PAL.woodLight, 8, 2, 1, 7);
+    R(PAL.bark, 3, 13, 1, 7); R(PAL.bark, 10, 13, 1, 7);
+    R(PAL.woodLight, 1, 10, 12, 3); R(PAL.wood, 1, 12, 12, 1);
+    R(PAL.wood, 1, 13, 2, 7); R(PAL.wood, 11, 13, 2, 7);
+    p.outline();
+    return p.canvas;
+  },
+  armchair() {
+    const p = new Pen(18, 20);
+    const R = (c, x, y, w = 1, h = 1) => p.rect(c, x + 1, y + 1, w, h);
+    R(PAL.plum, 2, 0, 12, 9); R(PAL.plumDark, 12, 0, 2, 9);
+    R(PAL.berry, 5, 3); R(PAL.berry, 10, 3);
+    R(PAL.rose, 3, 9, 10, 4); R(PAL.peach, 3, 9, 10, 1);
+    R(PAL.plumDark, 0, 6, 3, 9); R(PAL.plumDark, 13, 6, 3, 9); R(PAL.plum, 0, 6, 3, 1); R(PAL.plum, 13, 6, 3, 1);
+    R(PAL.plumDark, 3, 13, 10, 3);
+    R(PAL.bark, 1, 15, 2, 2); R(PAL.bark, 13, 15, 2, 2);
+    p.outline();
+    return p.canvas;
+  },
+  table() {
+    const p = new Pen(34, 24);
+    const R = (c, x, y, w = 1, h = 1) => p.rect(c, x + 1, y + 1, w, h);
+    R(PAL.bark, 2, 13, 3, 8); R(PAL.bark, 27, 13, 3, 8);
+    R(PAL.woodLight, 0, 4, 32, 8); R(PAL.straw, 0, 4, 32, 1); R(PAL.wood, 0, 11, 32, 2);
+    R(PAL.white, 4, 6, 7, 3); R(PAL.cream, 5, 7, 5, 1);
+    R(PAL.white, 21, 6, 7, 3); R(PAL.cream, 22, 7, 5, 1);
+    R(PAL.water, 14, 3, 4, 5); R(PAL.waterLight, 14, 3, 1, 4);
+    R(PAL.leaf, 15, 1, 2, 2); R(PAL.rose, 13, 0, 2, 2); R(PAL.sun, 17, 0, 2, 2);
+    p.outline();
+    return p.canvas;
+  },
+  bookshelf() {
+    const p = new Pen(34, 36);
+    const R = (c, x, y, w = 1, h = 1) => p.rect(c, x + 1, y + 1, w, h);
+    const r = rng(77);
+    R(PAL.bark, 0, 0, 32, 34); R(PAL.woodLight, 0, 0, 32, 2); R(PAL.barkDark, 2, 2, 28, 30);
+    const colors = [PAL.rose, PAL.berry, PAL.leaf, PAL.water, PAL.sun, PAL.plum, PAL.cream, PAL.peach];
+    for (const shelfY of [11, 21, 31]) {
+      let x = 2;
+      while (x < 29) {
+        const w = 2 + ((r() * 3) | 0), h = 6 + ((r() * 3) | 0);
+        if (x + w > 30) break;
+        if (r() < 0.12) { x += w; continue; }
+        R(colors[(r() * colors.length) | 0], x, shelfY - h, w, h);
+        x += w;
+      }
+      R(PAL.wood, 2, shelfY, 28, 1);
+    }
+    p.outline();
+    return p.canvas;
+  },
+  dresser() {
+    const p = new Pen(34, 26);
+    const R = (c, x, y, w = 1, h = 1) => p.rect(c, x + 1, y + 1, w, h);
+    R(PAL.cream, 22, 0, 6, 5); R(PAL.waterLight, 23, 1, 4, 3); R(PAL.rose, 6, 2, 2, 2);
+    R(PAL.wood, 0, 4, 32, 18); R(PAL.woodLight, 0, 4, 32, 2);
+    for (let i = 0; i < 3; i++) {
+      const y = 7 + i * 5;
+      R(PAL.bark, 2, y, 28, 4); R(PAL.woodLight, 3, y, 26, 3);
+      R(PAL.sun, 9, y + 1, 2, 1); R(PAL.sun, 21, y + 1, 2, 1);
+    }
+    R(PAL.bark, 1, 22, 3, 2); R(PAL.bark, 28, 22, 3, 2);
+    p.outline();
+    return p.canvas;
+  },
+  plant() {
+    const p = new Pen(16, 24);
+    p.line(PAL.leaf, 8, 14, 2, 4); p.line(PAL.leaf, 8, 14, 14, 4); p.line(PAL.leafDark, 8, 14, 8, 1);
+    p.line(PAL.leafDark, 8, 14, 3, 10); p.line(PAL.leaf, 8, 14, 13, 10);
+    p.rect(PAL.leafLight, 2, 4); p.rect(PAL.leafLight, 14, 4); p.rect(PAL.leafLight, 8, 1);
+    p.rect(PAL.roofDark, 3, 14, 10, 2);
+    p.rect(PAL.roof, 4, 16, 8, 6); p.rect(PAL.roofLight, 4, 16, 2, 5); p.rect(PAL.roofDark, 5, 21, 6, 1);
+    p.outline();
+    return p.canvas;
+  },
+  stove() {
+    const p = new Pen(18, 30);
+    const R = (c, x, y, w = 1, h = 1) => p.rect(c, x + 1, y + 1, w, h);
+    R(PAL.stoneDark, 6, 0, 4, 10); R(PAL.stone, 6, 0, 1, 10);
+    R(PAL.stone, 0, 9, 16, 2);
+    R(PAL.stoneDark, 1, 11, 14, 13);
+    R(PAL.ink, 4, 14, 8, 6); R(PAL.rose, 5, 16, 6, 4); R(PAL.sun, 6, 17, 4, 3); R(PAL.cream, 7, 18, 2, 1);
+    R(PAL.stoneDark, 1, 24, 3, 3); R(PAL.stoneDark, 12, 24, 3, 3);
+    p.outline();
+    return p.canvas;
+  },
+  rugRose() {
+    const p = new Pen(48, 32);
+    p.shade((x, y) => {
+      const dx = (x + 0.5 - 24) / 23, dy = (y + 0.5 - 16) / 15;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d > 1) return null;
+      if (d > 0.88) return PAL.berry;
+      if (d > 0.8) return PAL.cream;
+      if (d > 0.45) return (Math.round(Math.atan2(dy, dx) * 4) % 2) ? PAL.rose : PAL.peach;
+      if (d > 0.38) return PAL.cream;
+      return PAL.rose;
+    });
+    return p.canvas;
+  },
+  rugMeadow() {
+    const p = new Pen(32, 32);
+    p.shade((x, y) => {
+      const d = Math.hypot(x + 0.5 - 16, y + 0.5 - 16);
+      if (d > 15.5) return null;
+      if (d > 14) return PAL.leafDark;
+      if (d > 12.5) return PAL.cream;
+      return PAL.leafLight;
+    });
+    for (const [x, y] of [[10, 10], [20, 12], [14, 19], [22, 21], [8, 18]]) {
+      p.rect(PAL.white, x - 1, y); p.rect(PAL.white, x + 1, y); p.rect(PAL.white, x, y - 1); p.rect(PAL.white, x, y + 1);
+      p.rect(PAL.sun, x, y);
+    }
+    return p.canvas;
+  },
+};
+
+// Willow & Wool Home Goods: a plum-roofed, half-timbered shop (5 x 4 area).
+function furnitureShop() {
+  const p = new Pen(82, 76);
+  const R = (c, x, y, w = 1, h = 1) => p.rect(c, x + 1, y + 1, w, h);
+  for (let y = 4; y <= 34; y++) {
+    const t = (y - 4) / 30;
+    const xl = Math.round(12 - 12 * t), xr = Math.round(67 + 12 * t);
+    for (let x = xl; x <= xr; x++) {
+      let c = PAL.plum;
+      if (y <= 5) c = PAL.rose;
+      else if ((y - 4) % 4 === 3) c = PAL.plumDark;
+      else if ((x + Math.floor((y - 4) / 4) * 3) % 7 === 0) c = PAL.plumDark;
+      R(c, x, y);
+    }
+  }
+  R(PAL.plumDark, 0, 33, 80, 2);
+  // Sign with a little chair and a heart.
+  R(PAL.barkDark, 26, 14, 28, 13); R(PAL.cream, 27, 15, 26, 11);
+  R(PAL.wood, 31, 17, 2, 7); R(PAL.wood, 31, 21, 8, 2); R(PAL.wood, 37, 23, 1, 2); R(PAL.wood, 31, 23, 1, 2);
+  R(PAL.rose, 43, 18, 2, 1); R(PAL.rose, 46, 18, 2, 1); R(PAL.rose, 43, 19, 5, 1); R(PAL.rose, 44, 20, 3, 1); R(PAL.rose, 45, 21);
+  // Half-timbered walls.
+  R(PAL.cream, 3, 35, 74, 35);
+  R(PAL.wood, 3, 35, 74, 2);
+  for (const x of [3, 28, 50, 74]) R(PAL.wood, x, 35, 3, 35);
+  R(PAL.wood, 3, 42, 74, 1);
+  // Display window with a chair and a lamp inside.
+  R(PAL.barkDark, 8, 45, 18, 18); R(PAL.waterLight, 9, 46, 16, 16); R(PAL.white, 10, 47, 3, 2);
+  R(PAL.wood, 11, 53, 2, 7); R(PAL.wood, 11, 57, 6, 1); R(PAL.wood, 16, 58, 1, 2);
+  R(PAL.sun, 19, 50, 4, 3); R(PAL.bark, 20, 53, 1, 8);
+  R(PAL.wood, 7, 63, 20, 3); R(PAL.rose, 9, 61, 2, 2); R(PAL.sun, 14, 61, 2, 2); R(PAL.rose, 20, 61, 2, 2);
+  // Door (tile column 2).
+  R(PAL.barkDark, 32, 46, 16, 24); R(PAL.plum, 34, 48, 12, 22); R(PAL.waterLight, 37, 51, 6, 5);
+  R(PAL.sun, 43, 60, 1, 2);
+  // Right window with curtains.
+  R(PAL.barkDark, 54, 45, 16, 14); R(PAL.waterLight, 55, 46, 14, 12);
+  R(PAL.peach, 55, 46, 3, 12); R(PAL.peach, 66, 46, 3, 12); R(PAL.cream, 61, 46, 2, 12);
+  R(PAL.wood, 53, 59, 18, 3); R(PAL.leafLight, 55, 57, 2, 2); R(PAL.rose, 60, 57, 2, 2); R(PAL.sun, 65, 57, 2, 2);
+  // Foundation and step.
+  R(PAL.stone, 2, 70, 76, 4); R(PAL.stoneDark, 2, 73, 76, 1); R(PAL.stoneLight, 30, 70, 20, 3);
+  p.outline();
+  return p.canvas;
+}
+
+// A 16x16 icon from a larger sprite: scaled down to fit (nearest neighbour), centred.
+function iconFromSprite(canvas) {
+  const p = new Pen(16, 16);
+  const s = Math.min(1, 15 / canvas.width, 15 / canvas.height);
+  const w = Math.max(1, Math.round(canvas.width * s)), h = Math.max(1, Math.round(canvas.height * s));
+  p.g.imageSmoothingEnabled = false;
+  p.g.drawImage(canvas, Math.floor((16 - w) / 2), Math.floor((16 - h) / 2), w, h);
+  return p.canvas;
+}
+
+// Floor sample: a square swatch. Wallpaper: a little roll.
+function floorIcon(tile) {
+  const p = new Pen(16, 16);
+  p.g.drawImage(tile, 2, 2, 12, 12, 2, 2, 12, 12);
+  p.outline();
+  return p.canvas;
+}
+
+function wallpaperIcon(tile) {
+  const p = new Pen(16, 16);
+  p.g.drawImage(tile, 0, 0, 10, 11, 3, 2, 10, 11);
+  p.rect(PAL.white, 3, 13, 10, 1);
+  p.rect(PAL.pathLight, 3, 12, 10, 1);
+  p.rect(PAL.cream, 12, 2, 1, 11);
+  p.outline();
+  return p.canvas;
+}
+
 // ---------------------------------------------------------------- item icons (16x16)
 
 function iconPen(draw) {
@@ -1211,6 +1617,32 @@ export function buildPlaceholderArt(atlas) {
   atlas.add('obj.cottage.moss', cottage(PAL.leafDark, PAL.leafDeep, PAL.leaf, PAL.cream, PAL.pathLight), 33, 68);
   atlas.add('obj.cottage.sky', cottage(PAL.water, PAL.waterDeep, PAL.waterLight, PAL.pathLight, PAL.path), 33, 68);
   atlas.add('obj.forge', forge(), 25, 58);
+  atlas.add('obj.furnitureshop', furnitureShop(), 41, 76);
+
+  // The farmhouse interior: floor and wallpaper styles (with item icons), trim, furniture.
+  for (const [id, draw] of Object.entries(FLOOR_ART)) {
+    const tile = tilePen(draw);
+    atlas.add(`tile.floor.${id}`, tile);
+    atlas.add(`icon.floor.${id}`, floorIcon(tile), 8, 8);
+  }
+  for (const [id, draw] of Object.entries(WALL_ART)) {
+    const tile = tilePen(draw);
+    atlas.add(`tile.wall.${id}`, tile);
+    atlas.add(`icon.wall.${id}`, wallpaperIcon(tile), 8, 8);
+  }
+  atlas.add('tile.trim', trimTile());
+  atlas.add('edge.crown', crownEdge());
+  atlas.add('edge.baseboard', baseboardEdge());
+  atlas.add('edge.wallshadow', wallShadowEdge());
+  atlas.add('decor.doormat', doormat());
+  atlas.add('obj.window', windowSprite(), 9, 28);
+  atlas.add('fx.glow', glow(), 24, 24);
+  // Furniture stands on the bottom centre of its footprint, like every object.
+  for (const [id, draw] of Object.entries(FURNITURE_ART)) {
+    const c = draw();
+    atlas.add(`furn.${id}`, c, c.width / 2, c.height);
+    atlas.add(`icon.furn.${id}`, iconFromSprite(c), 8, 8);
+  }
   atlas.add('obj.fountain', fountain(), 25, 41);
   atlas.add('obj.bench', bench(), 17, 20);
   atlas.add('obj.lamp', lamp(), 7, 37);

@@ -93,10 +93,21 @@ Feedback after the full checklist passed:
 - [x] Tool upgrades at the new Bramblewick Forge: five tiers for the pickaxe, axe and hoe
       (fewer hits, less energy, faster swings). Save format v2 adds the forge to existing towns.
 
-## Phase 6: Home & furniture (next)
-The long-term goal the playtest asked for: walk into the farmhouse (an interior map), start
-with a basic bed (sleep there) and a lamp, and buy furniture, floors and wallpaper from a
-furniture shop in Bramblewick. Place / move / pick up furniture; all saved.
+## Phase 6: Home & furniture ✅
+The long-term goal the playtest asked for.
+- [x] Farmhouse interior (`data/maps/home.js`, 13×10): E on the farmhouse door goes in, the
+      doormat goes back out. Wallpapered walls with windows, an 11×6 floor
+- [x] Starts with a Basic Bed (sleep there: E on any part of it) and a Little Lamp; new games
+      and every morning start beside the bed
+- [x] Willow & Wool Home Goods in Bramblewick (9:00–17:00): Furniture / Floors / Wallpaper
+      tabs, a scrolling list and a preview on your current floor. 12 pieces, 4 floors,
+      5 wallpapers (`data/furniture.js`)
+- [x] Place furniture (ghost preview, green / red), pick it up with a tool or empty hands;
+      rugs are walkable and furniture can stand on them
+- [x] Floors and wallpaper apply to the whole room; the old style returns to the bag
+- [x] Lamps and the woodstove glow in the evening and soften the night indoors
+- [x] Saved with the map (objects + decor); save v3 adds the shop to existing towns
+**Deliverable:** decorate the farmhouse over many days, and keep it across reloads.
 
 ## Later (explicitly out of MVP scope)
 Fishing, mining, cooking, animals, seasonal crops, weather, festivals, quests, deeper

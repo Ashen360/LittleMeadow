@@ -21,6 +21,8 @@ import { InventoryMenu } from '../ui/InventoryMenu.js';
 import { MenuBox } from '../ui/MenuBox.js';
 import { ShopMenu } from '../ui/ShopMenu.js';
 import { ForgeMenu } from '../ui/ForgeMenu.js';
+import { FurnitureMenu } from '../ui/FurnitureMenu.js';
+import { HomeSystem } from '../home/Home.js';
 import { DialogueBox } from '../ui/DialogueBox.js';
 import { SettingsMenu } from '../ui/SettingsMenu.js';
 import { KeybindMenu } from '../ui/KeybindMenu.js';
@@ -35,12 +37,12 @@ import { Clock } from './Clock.js';
 import { SaveManager, SAVE_VERSION } from './SaveManager.js';
 import { FARM_MAP } from '../data/maps/farm.js';
 import { TOWN_MAP } from '../data/maps/town.js';
+import { HOME_MAP } from '../data/maps/home.js';
 import { ITEMS } from '../data/items.js';
 import { INVENTORY, STARTING_ITEMS, DEBUG_ITEMS, TOOLS, ECONOMY } from '../data/tuning.js';
 
 const SLOT_ACTIONS = Array.from({ length: INVENTORY.hotbar }, (_, i) => `slot${i + 1}`);
-const MAP_DEFS = { farm: FARM_MAP, town: TOWN_MAP };
-const HOME = { map: 'farm', x: 6, y: 7, facing: 0 }; // where you wake up: outside the farmhouse door
+const MAP_DEFS = { farm: FARM_MAP, town: TOWN_MAP, home: HOME_MAP };
 
 export class Game {
   constructor(canvas, options = {}) {
@@ -68,6 +70,9 @@ export class Game {
     this.bag = new InventoryMenu(this.ui);
     this.shop = new ShopMenu(this.ui);
     this.forge = new ForgeMenu(this.ui);
+    this.furnitureShop = new FurnitureMenu(this.ui, this.atlas);
+    this.home = new HomeSystem(this);
+    this.glowSprite = this.atlas.get('fx.glow');
     this.dialogue = new DialogueBox(this.ui, this.atlas);
     this.modals = [];
     this.cursorSprite = this.atlas.get('ui.cursor');
@@ -129,7 +134,13 @@ export class Game {
     this.player.action = null;
     this.npcs.loadState(null);
     this.npcs.resetDay(this.clock.minutes);
-    this.placePlayer(HOME.map, HOME.x, HOME.y, HOME.facing);
+    this.wakeUp();
+  }
+
+  // Puts the player beside their bed in the farmhouse (or by the door if there's no bed).
+  wakeUp() {
+    const spot = this.home.wakeSpot(this.maps.home);
+    this.placePlayer('home', spot.x, spot.y, spot.facing);
   }
 
   placePlayer(mapId, tx, ty, facing) {
@@ -177,11 +188,14 @@ export class Game {
     this.npcs.loadState(data.npcs);
     this.npcs.resetDay(this.clock.minutes);
     const p = data.player;
-    const mapId = this.maps[p.map] ? p.map : HOME.map;
-    this.placePlayer(mapId, 0, 0, p.facing);
-    this.player.x = p.x;
-    this.player.y = p.y;
-    if (this.player.blockedAt(p.x, p.y, this.map)) this.placePlayer(HOME.map, HOME.x, HOME.y, HOME.facing);
+    if (this.maps[p.map]) {
+      this.placePlayer(p.map, 0, 0, p.facing);
+      this.player.x = p.x;
+      this.player.y = p.y;
+      if (this.player.blockedAt(p.x, p.y, this.map)) this.wakeUp();
+    } else {
+      this.wakeUp();
+    }
     this.player.energy = p.energy;
     this.camera.follow(this.player.x, this.player.y - 10, this.map);
   }
@@ -380,6 +394,19 @@ export class Game {
         this.openModal(this.shop);
         this.audio.play('door');
       }
+    } else if (action === 'enter') {
+      const e = this.maps.home.entry;
+      this.audio.play('door');
+      this.fade.start(() => this.placePlayer('home', e.x, e.y, e.facing));
+    } else if (action === 'furniture') {
+      const m = this.clock.minutes;
+      if (m < ECONOMY.shopOpen || m >= ECONOMY.shopClose) {
+        this.hud.toast('Willow & Wool is closed. Open 9 am to 5 pm.', 3);
+      } else {
+        this.furnitureShop.reset();
+        this.openModal(this.furnitureShop);
+        this.audio.play('door');
+      }
     } else if (action === 'forge') {
       const m = this.clock.minutes;
       if (m < ECONOMY.shopOpen || m >= ECONOMY.shopClose) {
@@ -482,7 +509,7 @@ export class Game {
     this.npcs.resetDay(this.clock.minutes);
     this.player.energy = this.player.maxEnergy;
     this.player.action = null;
-    this.placePlayer(HOME.map, HOME.x, HOME.y, HOME.facing);
+    this.wakeUp();
     this.save();
     return sales;
   }
@@ -591,16 +618,29 @@ export class Game {
     if (!this.started || this.modal || this.player.action) return;
     const t = this.tools;
     if (!this.map.inBounds(t.tx, t.ty)) return;
+    const item = this.inventory.selectedItem;
+    if (this.map.indoor && item && item.furniture) {
+      this.home.drawGhost(ctx, this.atlas, item, t.tx, t.ty, t.byMouse, camX, camY);
+      return;
+    }
     this.atlas.draw(ctx, this.cursorSprite, t.tx * TILE - camX, t.ty * TILE - camY);
   }
 
   drawUI(ctx, camX, camY) {
-    // Evening light: a plum wash that deepens after 18:00.
+    // Evening light: a plum wash that deepens after 18:00. Indoors, lamps soften it and glow.
     const dark = this.clock.darkness;
     if (dark > 0) {
-      ctx.globalAlpha = dark * 0.42;
+      let lights = 0;
+      if (this.map.indoor) for (const o of this.map.objects) if (o.def.light) lights++;
+      ctx.globalAlpha = dark * (lights ? 0.26 : 0.42);
       ctx.fillStyle = PAL.plumDark;
       ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+      if (lights) {
+        ctx.globalAlpha = dark;
+        for (const o of this.map.objects) {
+          if (o.def.light) this.atlas.draw(ctx, this.glowSprite, o.px - camX, o.py - 14 - camY);
+        }
+      }
       ctx.globalAlpha = 1;
     }
     this.effects.draw(ctx, this.font, camX, camY);

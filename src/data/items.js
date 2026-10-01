@@ -2,6 +2,8 @@
 // energy = restored when eaten (right click); price = cost at the shop;
 // sellPrice = paid per item through the shipping box (no sellPrice = can't be shipped).
 
+import { FURNITURE, FLOORS, WALLPAPERS } from './furniture.js';
+
 export const ITEMS = {
   hoe: { name: 'Hoe', icon: 'item.hoe', tool: 'hoe', desc: 'Tills field soil for planting.' },
   wateringCan: {
@@ -31,3 +33,15 @@ export const ITEMS = {
   wood: { name: 'Wood', icon: 'item.wood', sellPrice: 2, desc: 'Sturdy. Useful for building, later.' },
   stone: { name: 'Stone', icon: 'item.stone', sellPrice: 3, desc: 'A good, solid stone.' },
 };
+
+// Decorating items (data/furniture.js): placed or applied inside the farmhouse. They can't be
+// shipped. furniture / floor / wallpaper = the key of the style or piece.
+for (const [id, f] of Object.entries(FURNITURE)) {
+  ITEMS[`furn_${id}`] = { name: f.name, icon: `icon.furn.${id}`, furniture: id, price: f.price, desc: f.desc };
+}
+for (const [id, f] of Object.entries(FLOORS)) {
+  ITEMS[`floor_${id}`] = { name: f.name, icon: `icon.floor.${id}`, floor: id, price: f.price, desc: f.desc };
+}
+for (const [id, w] of Object.entries(WALLPAPERS)) {
+  ITEMS[`wall_${id}`] = { name: w.name, icon: `icon.wall.${id}`, wallpaper: id, price: w.price, desc: w.desc };
+}

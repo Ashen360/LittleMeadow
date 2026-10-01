@@ -30,6 +30,7 @@ export class ToolSystem {
     this.holding = false; // the use button went down in the world and is still held
     this.tx = 0;
     this.ty = 0;
+    this.byMouse = false; // the target is the hovered tile (not the facing one)
   }
 
   update(dt, input) {
@@ -60,15 +61,19 @@ export class ToolSystem {
 
   // Returns true if the target tile moved.
   updateTarget(input) {
-    const { player, camera } = this.game;
+    const { player, camera, map } = this.game;
     const ptx = player.tileX, pty = player.tileY;
     let tx = ptx + FACING_DX[player.facing], ty = pty + FACING_DY[player.facing];
     const m = input.mouse;
+    this.byMouse = false;
     if (input.usingMouse && m.inside) {
       const mtx = Math.floor((m.x + camera.x) / TILE), mty = Math.floor((m.y + camera.y) / TILE);
-      if (Math.abs(mtx - ptx) <= 1 && Math.abs(mty - pty) <= 1) {
+      // Indoors the room is small, so the mouse reaches anywhere (easier decorating).
+      const reach = map.indoor ? Infinity : 1;
+      if (Math.abs(mtx - ptx) <= reach && Math.abs(mty - pty) <= reach) {
         tx = mtx;
         ty = mty;
+        this.byMouse = true;
       }
     }
     if (tx === this.tx && ty === this.ty) return false;
@@ -103,8 +108,13 @@ export class ToolSystem {
       this.harvest(crop);
       return;
     }
+    if (map.indoor && game.home.use(tx, ty, this.byMouse)) return;
     const item = inventory.selectedItem;
     if (!item) return;
+    if (item.furniture || item.floor || item.wallpaper) {
+      game.hud.toast('Decorations go inside the farmhouse.');
+      return;
+    }
     if (item.tool) this.swing(item.tool, inventory.selectedSlot);
     else if (item.seed) this.plant(item);
     else if (item.energy) game.hud.toast('Right-click to eat it.');
@@ -126,13 +136,12 @@ export class ToolSystem {
       this.harvest(crop);
       return;
     }
-    if (!map.inBounds(tx, ty)) return;
-    const obj = map.objectAt[map.index(tx, ty)];
+    const obj = map.topObjectAt(tx, ty);
     if (!obj) return;
     this.faceTarget();
     game.dirty = true;
     const use = obj.def.use;
-    if (use && tx === obj.x + use.dx && ty === obj.y + use.dy) game.useObject(use.action, obj);
+    if (use && (use.any || (tx === obj.x + use.dx && ty === obj.y + use.dy))) game.useObject(use.action, obj);
     else if (obj.def.examine) game.hud.toast(obj.def.examine);
   }
 
@@ -142,7 +151,7 @@ export class ToolSystem {
     const { tx, ty } = this;
     if (!map.inBounds(tx, ty)) return false;
     if (this.game.npcs.at(map.id, tx, ty)) return true;
-    const obj = map.objectAt[map.index(tx, ty)];
+    const obj = map.topObjectAt(tx, ty);
     return !!(obj && (obj.def.use || obj.def.examine));
   }
 

@@ -150,6 +150,9 @@ const SFX = {
       a.tone(f, 0.1, { slide: f * 0.9, vol: 0.08, attack: 0.015, delay: i * 0.1 });
     }
   },
+  // Furniture: a soft wooden "tok" when set down, a little lift when picked up.
+  place: (a) => { a.tone(240, 0.09, { type: 'triangle', vol: 0.2, slide: -60 }); a.noise(0.05, { vol: 0.08, freq: 900, attack: 0.005 }); },
+  pickup: (a) => { a.tone(330, 0.08, { type: 'triangle', vol: 0.14, slide: 160 }); },
   // The forge: a bright anvil ring.
   upgrade: (a) => {
     a.noise(0.05, { vol: 0.15, freq: 3000, type: 'highpass' });

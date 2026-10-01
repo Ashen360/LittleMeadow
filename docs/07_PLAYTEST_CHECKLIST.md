@@ -19,7 +19,7 @@ strawberry seeds), `?lowres` (1x rendering for very weak machines). F3 toggles t
 |---|---|
 | 0 Foundation | Farm map, WASD movement with forgiving corners, camera, crisp scaling, single-file build |
 | 1 Farming | Hoe / watering can / axe / pickaxe, soil, 3 crops (strawberry regrows), debris clearing, 24-slot bag, hotbar, energy, eating |
-| 2 Time + save | Clock and calendar, evening light, sleeping at the farmhouse door, autosave, title menu, pause menu |
+| 2 Time + save | Clock and calendar, evening light, sleeping, autosave, title menu, pause menu |
 | 3 Town + economy | Bramblewick, walking between maps, seed shop (9–5), shipping box with overnight pay, money |
 | 4 Villagers | Marigold, Otto, June and Pip with daily routines, dialogue with portraits, friendship hearts |
 | 5 Polish | Particles, synthesized sound and music, settings, key rebinding, large text, hold-to-repeat, save export/import |
@@ -75,7 +75,8 @@ Tick as you go; note anything odd next to the item.
 ### Days
 - [ ] The clock advances (10 minutes every 10 seconds); the screen dims after 6 PM
 - [ ] At 2:00 AM the clock stops with a gentle message
-- [ ] E on the farmhouse door asks to sleep; the next morning shows the new date and full energy
+- [ ] E on the bed (inside the farmhouse) asks to sleep; you wake beside it with the new
+      date and full energy
 - [ ] Watered turnips grow over 4 nights; unwatered ones don't grow that night
 - [ ] Harvest a ripe turnip with E (or Space / click)
 - [ ] Tilled soil you never planted goes back to field after 3 nights
@@ -90,6 +91,20 @@ Tick as you go; note anything odd next to the item.
 - [ ] An upgraded axe fells a tree in fewer chops and uses less energy; the tool's name shows
       its tier and its slot shows a coloured gem
 - [ ] An old save (from before the forge) still loads, and the forge is there
+
+### Home & furniture
+- [ ] A new game starts inside the farmhouse beside the bed; the doormat leads outside, and
+      E on the farmhouse door brings you back in
+- [ ] Willow & Wool (south-west of the town square, 9 to 5): switch tabs, scroll, and the
+      preview shows each piece on your floor; buying puts it in your bag
+- [ ] Indoors, hold a piece of furniture: a green ghost shows where it goes (red if it can't),
+      with the keyboard or the mouse; Space / click places it
+- [ ] Put a chair on a rug; walk over the rug
+- [ ] Click furniture with a tool or empty hands to pick it up again
+- [ ] Use a wallpaper or floor item indoors: the room changes and the old one returns to
+      your bag
+- [ ] After 6 PM the lamp (and woodstove) glow and the room stays cosier than outside
+- [ ] Reload: furniture, rugs, floor and wallpaper are all where you left them
 
 ### Villagers
 - [ ] June visits your mailbox around 7–8 AM; Pip visits your pond after lunch

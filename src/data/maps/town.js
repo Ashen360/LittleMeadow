@@ -27,7 +27,7 @@ export const TOWN_MAP = {
     'P.......,..,........=,.................T',
     'T....,,..,T.........=....,.............P',
     'P....,..............=..................T',
-    'T...P...............=...B..,...........P',
+    'T...................=...B..,...........P',
     'P...................=..................T',
     'T............T......===========....B...P',
     'P...............T......................T',
@@ -39,6 +39,7 @@ export const TOWN_MAP = {
   objects: [
     { type: 'store', x: 17, y: 4 },
     { type: 'forge', x: 24, y: 5 },  // keep in sync with the v1 -> v2 save migration
+    { type: 'furnitureShop', x: 4, y: 18 }, // keep in sync with the v2 -> v3 save migration
     { type: 'cottageRose', x: 5, y: 4 },
     { type: 'cottageMoss', x: 30, y: 4 },
     { type: 'cottageSky', x: 29, y: 20 },

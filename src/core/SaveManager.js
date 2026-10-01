@@ -2,7 +2,7 @@
 // a backup, and loading falls back to the backup if the main save is unreadable.
 // Old saves are upgraded by chained migrations: MIGRATIONS[n] turns a version-n save into n+1.
 
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 3;
 
 const KEY = 'littlemeadow.save';
 const BACKUP_KEY = 'littlemeadow.save.bak';
@@ -18,6 +18,17 @@ const MIGRATIONS = {
       town.objects.push(['forge', 24, 5]);
     }
     data.version = 2;
+    return data;
+  },
+  // v3 adds Willow & Wool Home Goods at (4, 18), clearing its lot and the pine in front of
+  // it. (The farmhouse interior is a new map: older saves simply start with its defaults.)
+  2: (data) => {
+    const town = data.maps && data.maps.town;
+    if (town && Array.isArray(town.objects)) {
+      town.objects = town.objects.filter(([, x, y]) => !(x >= 4 && x <= 8 && y >= 18 && y <= 22));
+      town.objects.push(['furnitureShop', 4, 18]);
+    }
+    data.version = 3;
     return data;
   },
 };
