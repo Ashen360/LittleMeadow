@@ -15,6 +15,10 @@ export class GameMap {
     this.indoor = !!def.indoor;
     this.entry = def.entry || null;                     // where you appear when coming in
     this.decor = def.decor ? { ...def.decor } : null;   // indoor floor / wallpaper styles
+    // Farmland you own (see `plots` in data/maps/farm.js); null = every tile is yours.
+    this.plots = def.plots || null;
+    this.plotSign = null;
+    this.setPlotLevel(0);
     const rows = def.rows;
     this.h = rows.length;
     this.w = rows[0].length;
@@ -62,6 +66,54 @@ export class GameMap {
       }
     }
     for (const o of def.objects || []) this.addObject(o.type, o.x, o.y);
+    this.placePlotSign();
+  }
+
+  // ---------------------------------------------------------------- owned farmland
+
+  setPlotLevel(level) {
+    this.plotLevel = level;
+    if (!this.plots) return;
+    [this.plotW, this.plotH] = this.plots.sizes[level];
+  }
+
+  get maxPlotLevel() {
+    return this.plots ? this.plots.sizes.length - 1 : 0;
+  }
+
+  // True if the tile is farmland you own (always true on maps without plots).
+  owns(tx, ty) {
+    if (!this.plots) return true;
+    const { x, y } = this.plots.origin;
+    return tx >= x && tx < x + this.plotW && ty >= y && ty < y + this.plotH;
+  }
+
+  // (Re)places the expansion sign just outside the plot: along its right edge from the bottom
+  // up, then along its bottom edge. Skips tiles with anything on them, and tiles where
+  // `occupied(tx, ty)` says someone is standing. No sign once the whole field is yours.
+  placePlotSign(occupied = null) {
+    if (this.plotSign) {
+      this.removeObject(this.plotSign);
+      this.plotSign = null;
+    }
+    if (!this.plots || this.plotLevel >= this.maxPlotLevel) return;
+    const { x, y } = this.plots.origin;
+    const w = this.plotW, h = this.plotH;
+    const spots = [];
+    for (let ty = y + h - 1; ty >= y; ty--) spots.push([x + w, ty]);
+    for (let tx = x + w - 1; tx >= x; tx--) spots.push([tx, y + h]);
+    // First pass avoids tilled soil, second accepts it.
+    for (const strict of [true, false]) {
+      for (const [tx, ty] of spots) {
+        if (!this.inBounds(tx, ty)) continue;
+        const i = this.index(tx, ty);
+        if (this.solid[i] || this.objectAt[i] || this.flatAt[i] || this.cropAt[i]) continue;
+        if (strict && this.soil[i]) continue;
+        if (occupied && occupied(tx, ty)) continue;
+        this.plotSign = this.addObject('plotSign', tx, ty);
+        return;
+      }
+    }
   }
 
   inBounds(tx, ty) {
@@ -151,18 +203,24 @@ export class GameMap {
   // Objects, soil and crops (crops are rebuilt through Farming so sprites resolve).
   saveState() {
     const state = {
-      objects: this.objects.map((o) => (o.hits ? [o.type, o.x, o.y, o.hits] : [o.type, o.x, o.y])),
+      objects: this.objects.filter((o) => !o.def.transient)
+        .map((o) => (o.hits ? [o.type, o.x, o.y, o.hits] : [o.type, o.x, o.y])),
       soil: Array.from(this.soil).join(''),
       watered: Array.from(this.watered).join(''),
       fallow: Array.from(this.fallow).join(''),
       crops: this.crops.map((c) => [c.id, c.x, c.y, c.growth]),
     };
     if (this.decor) state.decor = { ...this.decor };
+    if (this.plots) state.plotLevel = this.plotLevel;
     return state;
   }
 
   loadState(state, farming) {
     if (this.decor && state.decor) Object.assign(this.decor, state.decor);
+    // Saves from before farm plots have no level: they start at the first plot (their
+    // crops outside it can still be watered and harvested, but not replanted).
+    if (this.plots) this.setPlotLevel(Math.min(state.plotLevel || 0, this.maxPlotLevel));
+    this.plotSign = null;
     for (const o of this.objects.slice()) this.removeObject(o);
     for (const [type, x, y, hits] of state.objects) {
       if (!OBJECT_TYPES[type]) continue; // an object type that no longer exists
@@ -184,6 +242,7 @@ export class GameMap {
       crop.growth = growth;
       farming.setStage(crop);
     }
+    this.placePlotSign();
   }
 
   forFootprint(obj, fn) {

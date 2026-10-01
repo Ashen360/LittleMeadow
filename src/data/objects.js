@@ -40,6 +40,9 @@ export const OBJECT_TYPES = {
   mailbox: { sprite: 'obj.mailbox', w: 1, h: 1, solid: true, examine: 'The mailbox is empty.' },
   shippingBox: { sprite: 'obj.shippingbox', w: 1, h: 1, solid: true, use: { dx: 0, dy: 0, action: 'ship' } },
   sign: { sprite: 'obj.sign', w: 1, h: 1, solid: true, examine: 'East: Bramblewick.' },
+  // Stands just outside the farmland you own; E offers to expand it. transient = not saved
+  // (the map places it again from the plot level).
+  plotSign: { sprite: 'obj.plotsign', w: 1, h: 1, solid: true, transient: true, use: { any: true, action: 'expand' } },
   signFarm: { sprite: 'obj.sign', w: 1, h: 1, solid: true, examine: 'West: Little Meadow Farm.' },
 
   // Bramblewick.

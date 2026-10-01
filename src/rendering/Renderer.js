@@ -40,6 +40,8 @@ export class Renderer {
       path: range('tile.path', 2),
       plaza: range('tile.plaza', 2),
       field: range('tile.field', 2),
+      fieldWild: range('tile.fieldwild', 4),
+      stake: Object.fromEntries(SIDES.map(([s]) => [s, a.get(`edge.stake.${s}`)])),
       water: range('tile.water', 2),
       soil: a.get('tile.soil'),
       soilWet: a.get('tile.soilwet'),
@@ -113,9 +115,16 @@ export class Renderer {
         break;
       case 'field': {
         const i = ty * map.w + tx;
+        const owned = map.owns(tx, ty);
         if (map.soil[i]) a.draw(g, map.watered[i] ? t.soilWet : t.soil, x, y);
-        else a.draw(g, t.field[h % 2], x, y);
+        else a.draw(g, owned ? t.field[h % 2] : t.fieldWild[h % 4], x, y);
         this.drawEdges(map, tx, ty, x, y, (n) => n.grassy, t.grassEdge);
+        // A staked twine line marks the edge of the farmland you own.
+        if (owned) {
+          for (const [side, dx, dy] of SIDES) {
+            if (map.tileAt(tx + dx, ty + dy).tillable && !map.owns(tx + dx, ty + dy)) a.draw(g, t.stake[side], x, y);
+          }
+        }
         break;
       }
       case 'water':

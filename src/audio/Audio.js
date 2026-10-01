@@ -153,6 +153,11 @@ const SFX = {
   // Furniture: a soft wooden "tok" when set down, a little lift when picked up.
   place: (a) => { a.tone(240, 0.09, { type: 'triangle', vol: 0.2, slide: -60 }); a.noise(0.05, { vol: 0.08, freq: 900, attack: 0.005 }); },
   pickup: (a) => { a.tone(330, 0.08, { type: 'triangle', vol: 0.14, slide: 160 }); },
+  // New farmland: a rustle and a rising, happy arpeggio.
+  expand: (a) => {
+    a.noise(0.35, { vol: 0.08, freq: 1500, q: 0.6, attack: 0.05 });
+    [523, 659, 784, 1047].forEach((f, i) => a.tone(f, 0.22, { type: 'triangle', vol: 0.13, delay: 0.05 + i * 0.09 }));
+  },
   // The forge: a bright anvil ring.
   upgrade: (a) => {
     a.noise(0.05, { vol: 0.15, freq: 3000, type: 'highpass' });

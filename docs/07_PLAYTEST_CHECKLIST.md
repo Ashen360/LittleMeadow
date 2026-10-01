@@ -63,6 +63,10 @@ Tick as you go; note anything odd next to the item.
 - [ ] Music starts after your first key press or click; volume feels gentle
 
 ### Farming (field = the brown area east of the house)
+- [ ] Only the 3×3 corner inside the twine line can be tilled; the overgrown rest says to
+      use the sign
+- [ ] E on the plot sign: with too little money it says how much you need; with enough it
+      asks, then the field grows (5×4, 8×5, 12×7, 16×9) and the sign moves along
 - [ ] 1 = hoe: Space or left click tills the tile in front of you (or the hovered tile next to you)
 - [ ] 2 = watering can: water tilled soil; the gauge in the slot goes down; refill at the pond
       (watering should sound soft and bubbly, not slappy)

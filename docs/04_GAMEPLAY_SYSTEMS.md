@@ -27,6 +27,27 @@ Only the field (`tillable` ground) can be tilled, and only where no object stand
 block movement. Harvest a mature crop with E, or with left click / Space whatever is selected.
 Code: `farming/Farming.js` (rules) and `GameMap` (`soil`, `watered`, `fallow`, `cropAt`, `crops`).
 
+### Farmland expansion ✅
+You start owning only a **3×3** corner of the 16×9 field (the top-left, nearest the house).
+The rest is overgrown: it looks wild, and it can't be tilled or planted (a message points to
+the sign). Debris on it can still be cleared. A staked twine line marks the edge of your plot.
+The **plot sign** stands just outside your plot (right edge first, then bottom). E on it offers
+the next step, which grows the rectangle from the same corner:
+
+| Step | Size | Cost |
+|---|---|---|
+| Start | 3×3 | — |
+| 1 | 5×4 | 250g |
+| 2 | 8×5 | 600g |
+| 3 | 12×7 | 1,200g |
+| 4 | 16×9 (whole field) | 2,500g |
+
+After buying, the sign moves to the new edge (never onto the player); it disappears once the
+whole field is yours. Tuning: `plots` in `data/maps/farm.js`. The level is saved as
+`maps.farm.plotLevel`. Saves from before this feature start at 3×3: tilled soil and crops
+outside the plot stay, and can still be watered and harvested, but not replanted or re-tilled
+(empty soil there returns to wild field after 3 nights).
+
 ## Tools ✅
 | Tool | Energy | Range | Cooldown | Effect |
 |---|---|---|---|---|

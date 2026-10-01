@@ -14,7 +14,7 @@ cheerful jingles.
 ## World (MVP)
 | Map | Size | Contents |
 |---|---|---|
-| Farm | 40×30 tiles | Farmhouse (door = go inside), 16×9 field with debris, pond, trees, rocks, mailbox, shipping box, exit east to town |
+| Farm | 40×30 tiles | Farmhouse (door = go inside), 16×9 field with debris (you start with a 3×3 corner and buy the rest), pond, trees, rocks, mailbox, shipping box, exit east to town |
 | Farmhouse | 13×10 tiles | Your room: a bed (sleep), a lamp, windows; furnish it from Willow & Wool |
 | Bramblewick | ~40×30 tiles | General store, town square with fountain, 3 cottages, paths, flower beds, exit west to farm |
 
@@ -72,6 +72,8 @@ and extra maps. See the roadmap's "Later" list. (Tool upgrades were added after 
 playtest, and the house interior with furniture in Phase 6.)
 
 ## Long-term goals
+- **More farmland**: start with a 3×3 plot; the sign by it grows the field in four steps
+  (250g → 600g → 1,200g → 2,500g) up to the full 16×9. This is the first goal of the game.
 - **Tool upgrades** at the Bramblewick Forge: five tiers per tool, paid in gold and wood.
 - **Home**: furnish the farmhouse from Willow & Wool Home Goods: 12 pieces of furniture,
   4 floors and 5 wallpapers, from an 80g chair to a 1200g quilted bed.

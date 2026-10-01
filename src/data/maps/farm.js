@@ -37,6 +37,13 @@ export const FARM_MAP = {
     'PTPTPPTPTPTPPTPTPPTPPTPTPTPPTPTPTPPTPTPT',
     'TPPTPTPPTPPTPTPPTPTPTPPTPTPTPPPTPTPTPPTP',
   ],
+  // The farmland you own grows from the field's corner nearest the house. sizes[0] is the
+  // starting plot; costs[i] buys sizes[i + 1]. The sign to expand stands just outside the plot.
+  plots: {
+    origin: { x: 14, y: 3 },
+    sizes: [[3, 3], [5, 4], [8, 5], [12, 7], [16, 9]],
+    costs: [250, 600, 1200, 2500],
+  },
   objects: [
     { type: 'house', x: 4, y: 3 },
     { type: 'shippingBox', x: 10, y: 6 },

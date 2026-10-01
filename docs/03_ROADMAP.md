@@ -109,6 +109,14 @@ The long-term goal the playtest asked for.
 - [x] Saved with the map (objects + decor); save v3 adds the shop to existing towns
 **Deliverable:** decorate the farmhouse over many days, and keep it across reloads.
 
+## Farmland expansion ✅
+- [x] Start with a 3×3 corner of the field; the rest is overgrown and can't be farmed
+- [x] A plot sign beside your land offers four expansions (5×4, 8×5, 12×7, 16×9) for
+      250g / 600g / 1,200g / 2,500g; it moves with the plot and disappears at full size
+- [x] Twine-and-stake line around your plot; leaf burst and a jingle when it grows
+- [x] Saved as the farm's plot level; older saves start at 3×3 but keep harvesting what
+      they planted outside it
+
 ## Later (explicitly out of MVP scope)
 Fishing, mining, cooking, animals, seasonal crops, weather, festivals, quests, deeper
 relationships/romance, farm upgrades, crafting, more maps.

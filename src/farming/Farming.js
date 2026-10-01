@@ -17,7 +17,7 @@ export class Farming {
   canTill(map, tx, ty) {
     if (!map.inBounds(tx, ty)) return false;
     const i = map.index(tx, ty);
-    return map.tileAt(tx, ty).tillable === true && map.soil[i] === 0 && map.objectAt[i] === null;
+    return map.tileAt(tx, ty).tillable === true && map.owns(tx, ty) && map.soil[i] === 0 && map.objectAt[i] === null;
   }
 
   till(map, tx, ty) {
@@ -39,7 +39,8 @@ export class Farming {
   canPlant(map, tx, ty) {
     if (!map.inBounds(tx, ty)) return false;
     const i = map.index(tx, ty);
-    return map.soil[i] === 1 && map.cropAt[i] === null;
+    // Watering and harvesting work anywhere; planting only on land you own.
+    return map.soil[i] === 1 && map.cropAt[i] === null && map.owns(tx, ty);
   }
 
   plant(map, tx, ty, cropId) {

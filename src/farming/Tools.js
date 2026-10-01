@@ -7,6 +7,8 @@ import { ITEMS } from '../data/items.js';
 import { TOOLS, UPGRADES } from '../data/tuning.js';
 import { PAL } from '../rendering/palette.js';
 
+const LOCKED_FIELD = 'This part of the field isn\'t yours yet. The sign by your plot can expand it.';
+
 // Tile offsets per facing index (down, left, right, up).
 const FACING_DX = [0, -1, 1, 0];
 const FACING_DY = [1, 0, 0, -1];
@@ -201,8 +203,9 @@ export class ToolSystem {
     const { map, farming } = game;
     const { tx, ty } = this;
     if (!farming.canTill(map, tx, ty)) {
-      if (map.inBounds(tx, ty) && !map.tileAt(tx, ty).tillable && !map.objectAt[map.index(tx, ty)]) {
-        game.hud.toast('Only the field soil can be tilled.');
+      if (map.inBounds(tx, ty) && !map.objectAt[map.index(tx, ty)]) {
+        if (!map.tileAt(tx, ty).tillable) game.hud.toast('Only the field soil can be tilled.');
+        else if (!map.owns(tx, ty)) game.hud.toast(LOCKED_FIELD, 3);
       }
       return false;
     }
@@ -293,6 +296,8 @@ export class ToolSystem {
       game.effects.burst(tx * TILE + 8, ty * TILE + 12, PAL.soilLight, 4, { up: 25 });
       this.sound('plant');
       game.dirty = true;
+    } else if (map.inBounds(tx, ty) && map.tileAt(tx, ty).tillable && !map.owns(tx, ty)) {
+      hud.toast(LOCKED_FIELD, 3);
     } else if (map.inBounds(tx, ty) && !map.soil[map.index(tx, ty)]) {
       hud.toast('Till the soil with the hoe first.');
     }

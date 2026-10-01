@@ -139,7 +139,9 @@ Version history: v1 = original; v2 = adds the forge to the town (clearing its lo
 v3 = adds Willow & Wool to the town (clearing its lot and a pine). Tool upgrade levels live
 on inventory slots (`slot.level`) and needed no migration. A brand-new map (like the
 farmhouse interior, `home`) needs none either: a save without it keeps the map's defaults.
-Indoor maps also save `decor: { floor, wall }`.
+Indoor maps also save `decor: { floor, wall }`, and the farm saves `plotLevel` (owned
+farmland; missing = the 3×3 start, no migration). Objects marked `transient` (the plot sign)
+aren't saved: the map re-places them from its state on load.
 
 ## Bundling constraints (keep `tools/build.mjs` simple)
 - Named exports only (`export class/function/const`). No `export default`, no `export { }` lists.

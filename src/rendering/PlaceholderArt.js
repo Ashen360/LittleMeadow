@@ -167,6 +167,58 @@ function fieldTile(seed) {
   return p.canvas;
 }
 
+// Field you don't own yet: the same earth, overgrown with grass and weeds.
+function fieldWildTile(seed) {
+  const p = new Pen(16, 16);
+  const r = rng(seed);
+  p.rect(PAL.dirt, 0, 0, 16, 16);
+  for (let i = 0; i < 5; i++) {
+    const cx = r() * 16, cy = r() * 16, rad = 2 + r() * 2.5;
+    p.shade((x, y) => {
+      const dx = Math.min(Math.abs(x + 0.5 - cx), 16 - Math.abs(x + 0.5 - cx));
+      const dy = Math.min(Math.abs(y + 0.5 - cy), 16 - Math.abs(y + 0.5 - cy));
+      return dx * dx + dy * dy <= rad * rad ? PAL.grassDark : null;
+    });
+  }
+  for (let i = 0; i < 6; i++) {
+    const x = (r() * 15) | 0, y = 1 + ((r() * 14) | 0);
+    p.rect(PAL.grass, x, y); p.rect(PAL.grass, x + 1, y - 1);
+  }
+  for (let i = 0; i < 2; i++) {
+    const x = 2 + ((r() * 12) | 0), y = 3 + ((r() * 10) | 0);
+    p.rect(PAL.leafDark, x, y, 1, 2); p.rect(PAL.leaf, x - 1, y); p.rect(PAL.leaf, x + 1, y);
+  }
+  return p.canvas;
+}
+
+// The edge of your farmland: a twine line with a little wooden stake.
+function stakeEdge(side) {
+  return edgeOverlay(side, (put) => {
+    for (let x = 0; x < 16; x++) put(PAL.straw, x, 1);
+    for (let y = 0; y < 4; y++) {
+      put(PAL.woodLight, 7, y);
+      put(PAL.bark, 8, y);
+    }
+  });
+}
+
+// The expansion sign: a little board with a sprout and a coin.
+function plotSign() {
+  const p = new Pen(18, 24);
+  p.rect(PAL.wood, 8, 12, 2, 11);
+  p.rect(PAL.bark, 9, 12, 1, 11);
+  p.rect(PAL.woodLight, 1, 2, 16, 10);
+  p.rect(PAL.straw, 1, 2, 16, 1);
+  p.rect(PAL.wood, 1, 11, 16, 1);
+  p.rect(PAL.leafDark, 6, 6, 1, 4);
+  p.rect(PAL.leaf, 4, 5, 2, 2); p.rect(PAL.leafLight, 7, 4, 2, 2);
+  p.rect(PAL.soil, 4, 9, 5, 1);
+  p.ellipse(PAL.sun, 12.5, 6.5, 2.5, 2.5);
+  p.rect(PAL.straw, 12, 6, 1, 2);
+  p.outline();
+  return p.canvas;
+}
+
 function soilTile(wet) {
   const p = new Pen(16, 16);
   const base = wet ? PAL.soilDark : PAL.soil;
@@ -1591,6 +1643,9 @@ export function buildPlaceholderArt(atlas) {
   for (let i = 0; i < 3; i++) atlas.add(`decor.flowers${i}`, flowersDecor(211 + i * 13));
   for (let i = 0; i < 2; i++) atlas.add(`tile.path${i}`, pathTile(307 + i * 5));
   for (let i = 0; i < 2; i++) atlas.add(`tile.field${i}`, fieldTile(401 + i * 11));
+  for (let i = 0; i < 4; i++) atlas.add(`tile.fieldwild${i}`, fieldWildTile(421 + i * 13));
+  for (const side of ['n', 's', 'e', 'w']) atlas.add(`edge.stake.${side}`, stakeEdge(side));
+  atlas.add('obj.plotsign', plotSign(), 9, 24);
   for (let i = 0; i < 2; i++) atlas.add(`tile.water${i}`, waterTile(503 + i * 3));
   atlas.add('tile.soil', soilTile(false));
   atlas.add('tile.soilwet', soilTile(true));

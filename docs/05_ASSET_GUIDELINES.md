@@ -23,7 +23,9 @@ look-alike characters, no copied UI layouts.
 
 ## Sprite naming
 `category.name[.variant][.frame]`, all lowercase:
-`tile.grass0..3`, `tile.path0..1`, `tile.field0..1`, `tile.water0..1`, `tile.soil`, `tile.soilwet`,
+`tile.grass0..3`, `tile.path0..1`, `tile.field0..1`, `tile.fieldwild0..3` (field you don't own
+yet), `edge.stake.{n,s,e,w}` (the twine line around your plot), `obj.plotsign` (18×24),
+`tile.water0..1`, `tile.soil`, `tile.soilwet`,
 `edge.grass.{n,s,e,w}`, `edge.water.{n,s,e,w}`, `decor.flowers0..2`,
 `obj.tree`, `obj.pine`, `obj.rock`, `obj.branch`, `obj.bush`, `obj.house`, `obj.mailbox`,
 `obj.shippingbox`, `obj.sign`, `obj.stump`, `player.{down,left,right,up}.{0,1,2}`, `shadow.small`.

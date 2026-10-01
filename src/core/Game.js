@@ -394,6 +394,8 @@ export class Game {
         this.openModal(this.shop);
         this.audio.play('door');
       }
+    } else if (action === 'expand') {
+      this.offerExpansion();
     } else if (action === 'enter') {
       const e = this.maps.home.entry;
       this.audio.play('door');
@@ -419,6 +421,48 @@ export class Game {
     } else if (action === 'ship') {
       this.shipSelected();
     }
+  }
+
+  // The plot sign: offers the next, bigger piece of farmland.
+  offerExpansion() {
+    const map = this.maps.farm;
+    if (map.plotLevel >= map.maxPlotLevel) return;
+    const cost = map.plots.costs[map.plotLevel];
+    const [w, h] = map.plots.sizes[map.plotLevel + 1];
+    if (this.money < cost) {
+      this.ask(`Growing your field to ${w} x ${h} costs ${cost}g. You have ${this.money}g, so keep saving!`, [{ label: 'OK' }]);
+      return;
+    }
+    this.ask(`Grow your field to ${w} x ${h} for ${cost}g?`, [
+      { label: 'Expand', action: () => this.expandField() },
+      { label: 'Not now' },
+    ]);
+  }
+
+  expandField() {
+    const map = this.maps.farm;
+    const cost = map.plots.costs[map.plotLevel];
+    if (this.money < cost || map.plotLevel >= map.maxPlotLevel) return;
+    const { x, y } = map.plots.origin;
+    const oldW = map.plotW, oldH = map.plotH;
+    this.money -= cost;
+    map.setPlotLevel(map.plotLevel + 1);
+    const p = this.player;
+    // Never drop the new sign onto the player (their 10x6 feet box).
+    map.placePlotSign((tx, ty) => map === this.map &&
+      p.x + 5 > tx * TILE && p.x - 5 < (tx + 1) * TILE && p.y > ty * TILE && p.y - 6 < (ty + 1) * TILE);
+    this.renderer.bakeMap(map);
+    // A little burst of leaves over the new land.
+    for (let ty = y; ty < y + map.plotH; ty++) {
+      for (let tx = x; tx < x + map.plotW; tx++) {
+        if ((tx < x + oldW && ty < y + oldH) || (tx + ty) % 3 !== 0) continue;
+        this.effects.burst(tx * TILE + 8, ty * TILE + 10, PAL.leafLight, 2, { up: 30 });
+      }
+    }
+    this.audio.play('expand');
+    const done = map.plotLevel >= map.maxPlotLevel;
+    this.hud.toast(done ? 'The whole field is yours now. Happy farming!' : `Your field is now ${map.plotW} x ${map.plotH}!`, 3);
+    this.dirty = true;
   }
 
   // Puts the selected stack in the shipping box. With empty hands, takes the last stack back.
