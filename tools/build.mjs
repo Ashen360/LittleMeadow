@@ -1,5 +1,8 @@
-// Bundles src/ into dist/LittleMeadow.html: one self-contained file that runs from file://
-// (double-click to play, no server). Zero dependencies.
+// Bundles src/ into "Play Little Meadow.html" at the repo root: one self-contained file that
+// runs from file:// (double-click to play, no server). Zero dependencies.
+// The file is committed so a plain "Download ZIP" from GitHub is ready to play; rebuild and
+// commit it with every change (CI fails if it's stale). Output is identical on every OS
+// (line endings are normalised), so the check doesn't trip over Windows checkouts.
 //
 // Each module becomes a function scope in a registry; imports become destructuring.
 // Source constraints (see docs/02_TECHNICAL_ARCHITECTURE.md):
@@ -13,7 +16,11 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const entry = path.join(root, 'src', 'main.js');
-const outFile = path.join(root, 'dist', 'LittleMeadow.html');
+const outFile = path.join(root, 'Play Little Meadow.html');
+
+function read(file) {
+  return fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
+}
 
 const IMPORT_RE = /^import\s*\{([^}]*)\}\s*from\s*['"]([^'"]+)['"];?[ \t]*$/gm;
 const EXPORT_DECL_RE = /^export\s+(?:async\s+)?(class|function\*?|const|let|var)\s+([A-Za-z_$][\w$]*)/gm;
@@ -30,7 +37,7 @@ function visit(file, stack) {
   if (stack.includes(file)) {
     throw new Error(`Import cycle: ${[...stack, file].map(id).join(' -> ')}`);
   }
-  const code = fs.readFileSync(file, 'utf8');
+  const code = read(file);
   for (const m of code.matchAll(IMPORT_RE)) {
     visit(path.resolve(path.dirname(file), m[2]), [...stack, file]);
   }
@@ -39,7 +46,7 @@ function visit(file, stack) {
 }
 
 function transform(file) {
-  let code = fs.readFileSync(file, 'utf8');
+  let code = read(file);
   if (/^export\s+default\b/m.test(code)) throw new Error(`${id(file)}: default exports are not supported`);
   if (/^export\s*\{/m.test(code)) throw new Error(`${id(file)}: export lists are not supported`);
   if (/^import\s+(?!\{)/m.test(code)) throw new Error(`${id(file)}: only "import { ... } from" is supported`);
@@ -63,13 +70,12 @@ function transform(file) {
 visit(entry, []);
 const bundle = `"use strict";\n(() => {\nconst __m = {};\n${order.map(transform).join('\n')}})();\n`;
 
-const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const html = read(path.join(root, 'index.html'));
 const start = html.indexOf('<!-- DEV-ONLY:START -->');
 const end = html.indexOf('<!-- DEV-ONLY:END -->');
 if (start < 0 || end < 0) throw new Error('index.html is missing the DEV-ONLY markers');
 const script = `<script>\n${bundle.replace(/<\/script/gi, '<\\/script')}</script>`;
 const out = html.slice(0, start) + script + html.slice(end + '<!-- DEV-ONLY:END -->'.length);
 
-fs.mkdirSync(path.dirname(outFile), { recursive: true });
 fs.writeFileSync(outFile, out);
 console.log(`Built ${id(outFile)}: ${order.length} modules, ${(out.length / 1024).toFixed(1)} KB`);

@@ -3,7 +3,11 @@
 ## Stack
 - Vanilla JavaScript, ES modules, Canvas 2D. **No runtime or dev dependencies.**
 - `tools/serve.mjs`: static dev server (Node, zero dependencies).
-- `tools/build.mjs`: bundles `src/` into `dist/LittleMeadow.html`, a single file that runs from `file://`.
+- `tools/build.mjs`: bundles `src/` into `Play Little Meadow.html` at the repo root, a single
+  file that runs from `file://`. It is **committed**, so a GitHub "Download ZIP" is ready to
+  play. Rebuild and commit it with every code change: `.github/workflows/build-check.yml`
+  rebuilds it on each push and fails if the committed copy differs. The build normalises line
+  endings, so Windows and Linux produce identical bytes (`.gitattributes` keeps it LF).
 
 ## Directory layout
 ```

@@ -1,4 +1,4 @@
-# Build output (regenerate with: node tools/build.mjs)
+# Old build location (the playable build is now "Play Little Meadow.html", committed)
 dist/
 
 # OS / editor noise

@@ -18,7 +18,8 @@ double-clicking it. Saves are versioned JSON in `localStorage`.
 | What | Command |
 |---|---|
 | Dev server | `node tools/serve.mjs` → http://localhost:8080 |
-| Single-file build | `node tools/build.mjs` → `dist/LittleMeadow.html` (double-click, works offline) |
+| Play (no setup) | Download the repo ZIP, double-click `Play Little Meadow.html` (works offline) |
+| Single-file build | `node tools/build.mjs` → `Play Little Meadow.html` (commit it; CI checks it's fresh) |
 | Debug overlay | `F3` or `` ` `` in game, or add `?debug` to the URL |
 | Low-power rendering | add `?lowres` to the URL (1× render scale) |
 

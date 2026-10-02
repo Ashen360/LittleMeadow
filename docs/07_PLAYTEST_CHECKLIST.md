@@ -7,11 +7,9 @@ and save/reload round-trips, with no console errors. What automation can't judge
 That's what this checklist is for.
 
 ## How to play
-```
-node tools/build.mjs          # makes dist/LittleMeadow.html
-```
-Double-click `dist/LittleMeadow.html` (works offline), or run `node tools/serve.mjs` and open
-http://localhost:8080. Handy URL flags: `?debug` (overlay on, N = next day, extra potato and
+Double-click `Play Little Meadow.html` in the repo folder (or in a GitHub "Download ZIP"); it
+works offline. For development, run `node tools/serve.mjs` and open http://localhost:8080
+(rebuild the play file with `node tools/build.mjs`). Handy URL flags: `?debug` (overlay on, N = next day, extra potato and
 strawberry seeds), `?lowres` (1x rendering for very weak machines). F3 toggles the overlay.
 
 ## What's implemented

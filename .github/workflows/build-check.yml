@@ -1,0 +1,25 @@
+# Makes sure the committed "Play Little Meadow.html" matches the source code, so a plain
+# "Download ZIP" from GitHub always contains the latest playable game.
+# If this fails: run `node tools/build.mjs` and commit the updated file.
+name: Playable build is up to date
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Rebuild the single-file game
+        run: node tools/build.mjs
+      - name: Compare with the committed file
+        run: |
+          if ! git diff --exit-code -- "Play Little Meadow.html"; then
+            echo "::error::Play Little Meadow.html is out of date. Run 'node tools/build.mjs' and commit it."
+            exit 1
+          fi
