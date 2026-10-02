@@ -16,7 +16,7 @@ from disk.)
 ## Develop
 Run `node tools/serve.mjs` and open http://localhost:8080 (no dependencies to install).
 After changing the code, run `node tools/build.mjs` to refresh `Play Little Meadow.html`
-and commit it with your change; a GitHub check fails if it's out of date.
+and commit it with your change, so the ZIP download stays up to date.
 
 | Action | Keys |
 |---|---|

@@ -1,8 +1,8 @@
 // Bundles src/ into "Play Little Meadow.html" at the repo root: one self-contained file that
 // runs from file:// (double-click to play, no server). Zero dependencies.
 // The file is committed so a plain "Download ZIP" from GitHub is ready to play; rebuild and
-// commit it with every change (CI fails if it's stale). Output is identical on every OS
-// (line endings are normalised), so the check doesn't trip over Windows checkouts.
+// commit it with every change. Output is identical on every OS (line endings are
+// normalised), so rebuilding on Windows never shows a spurious change.
 //
 // Each module becomes a function scope in a registry; imports become destructuring.
 // Source constraints (see docs/02_TECHNICAL_ARCHITECTURE.md):
